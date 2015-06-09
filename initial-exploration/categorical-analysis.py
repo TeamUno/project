@@ -81,7 +81,10 @@ remove_outlier(demo_distr, "payments")
 # ---------------------------------------------------------
 # Numerical variables analysis
 
-# we have a very skewed histogram
+# we can see from the boxplot that the historgram is skewed
+demo_distr.merchants.plot(kind="box")
+
+# we have a positive skewed histogram
 demo_distr.merchants.plot(kind="hist")
 
 
