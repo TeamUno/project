@@ -1,0 +1,40 @@
+<ion-view view-title="Where Locals Go">
+  <ion-nav-title>
+    <div class="bar bar-header">
+      <h1 class="title">Where Locals Go</h1>
+    </div>
+
+  </ion-nav-title>
+  <ion-content class="padding">
+    <div class="list card card-item" ng-repeat="item in Places">
+      <div class="item item-body" style="background: url('{{item.img}}') no-repeat center center fixed">
+         <h2 style="color: white;">{{item.name}}</h2>
+         <p style="color: white; font-size: medium">
+          {{item.text}}
+        </p>
+        <p style="color: white;">
+          <a href="#" class="subdued">1 Like</a>
+          <a href="#" class="subdued">5 Comments</a>
+        </p>
+      </div>
+    <div class="item tabs tabs-secondary tabs-icon-left">
+        <a class="tab-item" href="#">
+            <i class="icon ion-thumbsup"></i>
+            Like
+        </a>
+        <a class="tab-item" href="#">
+            <i class="icon ion-chatbox"></i>
+            Comment
+        </a>
+        <a class="tab-item" href="#">
+            <i class="icon ion-share"></i>
+            Share
+        </a>
+        <a class="tab-item" href="#">
+            <i class="icon ion-ios-telephone"></i>
+            Phone
+        </a>
+    </div>
+    </div>
+  </ion-content>
+</ion-view>

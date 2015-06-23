@@ -9,11 +9,11 @@ angular.module('starter.controllers', [])
   //
   //$scope.$on('$ionicView.enter', function(e) {
   //});
-  
-  $scope.Places = Places.all();
-  $scope.remove = function(chat) {
-    Places.remove(chat);
-  }
+
+ Places.all(function(data, status) {
+       $scope.Places=data;
+ });
+
 })
 
 .controller('AccountCtrl', function($scope) {
