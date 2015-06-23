@@ -21,7 +21,11 @@ class IndexHandler(web.RequestHandler):
 
 class PlacesHandler(web.RequestHandler):
     def post(self):
-        places = db.places.find()
+        preference_data = {}
+        if self.request.body != "":
+            preference_data = json.loads(self.request.body)
+        cp = db.demographic_distribution.find({'gender': preference_data["gender"], 'category': preference_data["category"]}).count()
+        places = db.places.find({})[:3]
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(list(places), default=json_util.default))
 
@@ -47,5 +51,5 @@ application = web.Application([
 ], **settings)
 
 if __name__ == "__main__":
-    application.listen(8888)
+    application.listen(3333)
     ioloop.IOLoop.instance().start()

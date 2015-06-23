@@ -1,21 +1,29 @@
 angular.module('starter.controllers', [])
 
 
-.controller('PlacesCtrl', function($scope, Places) {
+.controller('PlacesCtrl', function($scope, $rootScope, Places) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
   // To listen for when this page is active (for example, to refresh data),
   // listen for the $ionicView.enter event:
   //
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
 
- Places.all(function(data, status) {
-       $scope.Places=data;
+  console.log('PlacesCtrl');
+
+ Places.all($rootScope,function(data, status) {
+       $rootScope.Places=data;
  });
 
 })
 
-.controller('AccountCtrl', function($scope) {
-
+.controller('AccountCtrl', function($rootScope) {
+    $rootScope.preferences = {
+        category:'es_barsandrestaurants',
+        age: 33,
+        gender: '',
+        amount:33
+    };
+    $rootScope.recomendme = function() {
+        window.location='#/tab/dash';
+    };
 });
