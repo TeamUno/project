@@ -6,32 +6,28 @@ Created on Sat Jun 20 15:23:29 2015
 """
 
 import foursquare as fq
-#import json
+import json
 import csv
 import os
-import pandas as pd
 
 # Construct the client object
-os.environ.get('FOURSQUARE_CLIENT_ID')
+
 client = fq.Foursquare(client_id = os.environ.get('FOURSQUARE_CLIENT_ID'),
                        client_secret = os.environ.get('FOURSQUARE_CLIENT_SECRET'))
 
-bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
-                '08008', '08009', '08010', '08011', '08012', '08013', '08014',
-                '08015', '08016', '08017', '08018', '08019', '08020', '08021',
-                '08022', '08023', '08024', '08025', '08026', '08027', '08028',
-                '08029', '08030', '08031', '08032', '08033', '08034', '08035',
-                '08036', '08037', '08038', '08039', '08040', '08041', '08042']
 
 # print json.dumps(response['groups'] ,indent=2, separators=(',', ': '))
-
-with open('dataset/top_venues.csv', 'w') as csvfile:
+offset_range= range(0,11,1)
+with open('dataset/offset_top_venues.csv', 'w') as csvfile:
     fieldnames = ['name', 'rating', 'price', 'phone', 'city', 'merchant_zipcode',
                   'address', 'latitude', 'longitude', 'category']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
-    for zipcode in bcn_zipcodes:
-        response = client.venues.explore(params= {'near': zipcode + ", Barcelona, Cataluña", 'limit': 50})
+
+    for offset in offset_range:
+        response = client.venues.explore(params= {'ll': '41.3879, 2.1699',
+                                          'offset': str(offset),
+                                          'limit': '50'})
         for groups in response['groups']:
             for group in groups['items']:
                 venue = group['venue']
@@ -63,6 +59,3 @@ with open('dataset/top_venues.csv', 'w') as csvfile:
                     venue_row['category'] = ",".join(category_list)
 
                 writer.writerow(venue_row)
-top_venues = pd.read_csv("dataset/top_venues.csv")
-top_venues.drop_duplicates(inplace=True)
-top_venues.to_csv("dataset/top_venues.csv")
