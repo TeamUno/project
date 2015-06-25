@@ -1,0 +1,63 @@
+<ion-view view-title="Preferences">
+  <ion-content>
+    <ion-list>
+      <div class="list">
+      </div>
+      <div class="list">
+        <label class="item item-input item-select">
+          <div class="input-label">
+            Category
+          </div>
+          <select ng-model="preferences.category">
+            <option value="es_barsandrestaurants" selected>Bars & Restaurants</option>
+            <option value="es_fashion">Fashion</option>
+            <option value="es_wellnessandbeauty">Wellness & Beauty</option>
+            <option value="es_food">Food</option>
+          </select>
+        </label>
+      </div>
+      <div class="list">
+        <div class="item range range-positive">
+          <div class="input-label">
+            Age
+          </div>
+          <i class="icon ion-ios-person-outline"></i>
+          <input type="range" name="age" min="0" max="100" value="33" ng-model="preferences.age">
+          <i class="icon ion-ios-personadd"></i>
+        </div>
+      </div>
+      <div class="list tabs">
+        <label class="item tab-item item-radio">
+          <input type="radio" name="gender" value="male" checked="checked" ng-model="preferences.gender">
+          <div class="item-content">
+            Male
+          </div>
+          <i class="radio-icon ion-checkmark"></i>
+        </label>
+        <label class="item tab-item item-radio">
+          <input type="radio" name="gender" value="female" checked="checked" ng-model="preferences.gender">
+          <div class="item-content">
+            Female
+          </div>
+          <i class="radio-icon ion-checkmark"></i>
+        </label>
+      </div>
+      <div class="list">
+        <div class="item range range-positive">
+          <div class="input-label">
+            Amount to spend
+          </div>
+          <i class="icon ion-ios-pricetag-outline"></i>
+          <input type="range" name="amount" min="0" max="100" value="33" ng-model="preferences.amount">
+          <i class="icon ion-ios-pricetags"></i>
+
+        </div>
+      </div>
+      <div class="list">
+        <button class="button button-block button-assertive" ng-click="recomendme()">
+          Recomend me
+        </button>
+      </div>
+    </ion-list>
+  </ion-content>
+</ion-view>
