@@ -17,12 +17,6 @@ angular.module('starter.controllers', [])
 })
 
 .controller('AccountCtrl', function($rootScope) {
-    $rootScope.preferences = {
-        category:'es_barsandrestaurants',
-        age: 33,
-        gender: '',
-        amount:33
-    };
     $rootScope.recomendme = function() {
         window.location='#/tab/dash';
     };

@@ -7,7 +7,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
-.run(function($ionicPlatform) {
+.run(function($rootScope,$ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -19,6 +19,16 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       StatusBar.styleLightContent();
     }
   });
+  $rootScope.preferences = {
+    category:'es_barsandrestaurants',
+    age: 33,
+    gender: '',
+    amount:33
+  };
+})
+
+.filter('escape', function() {
+  return window.encodeURIComponent;
 })
 
 .config(function($stateProvider, $urlRouterProvider) {
