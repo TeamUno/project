@@ -23,7 +23,7 @@ db = conn['TeamUno']
 venues=db.venuesFoursquare
 venues.create_index('id',unique=True) #el índice será el id del venue, y unique=True no nos dejará introducir duplicados
 
-
+# g1datascienceub en https://es.foursquare.com/developers/apps
 client = fq.Foursquare(client_id ='CLIENT_ID_FS',client_secret ='CLIENT_S_FS')
 
 centroides=open('/Users/diego/Desktop/Centroids/centroidsok.csv','r')
