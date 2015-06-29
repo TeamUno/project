@@ -7,6 +7,7 @@ Created on Sat Jun 27 12:47:40 2015
 
 import pandas as pd
 import numpy as np
+from sklearn import cross_validation
 
 # Load datasets
 names = ["merchant_zipcode", "date", "category", "age_interval", "gender", "merchants", "cards", "payments", "avg_payment", "max_payment", "min_payment", "std"]
@@ -35,7 +36,6 @@ demo_stats = demo_stats[demo_stats.amount < 500]
 demo_stats = demo_stats[demo_stats.amount > 0]
 
 demo_stats["amount_level"] = pd.cut(demo_stats.amount, 7, labels = ["very-low", "low", "low-medium", "medium", "medium-high", "high", "very-high"])
-demo_stats["amount_level"] = pd.cut(demo_stats.amount, 7, labels = ["very-low", "low", "low-medium", "medium", "medium-high", "high", "very-high"])
 demo_stats["max_payment_level"] = pd.cut(demo_stats.max_payment, 7, labels = ["very-low", "low", "low-medium", "medium", "medium-high", "high", "very-high"])
 demo_stats["min_payment_level"] = pd.cut(demo_stats.min_payment, 7, labels = ["very-low", "low", "low-medium", "medium", "medium-high", "high", "very-high"])
 
@@ -47,6 +47,8 @@ demo_stats['merchant_zipcode'] = demo_stats['merchant_zipcode'].map(lambda d: tu
 X = demo_stats[["weekday","age_interval", "gender",  "max_payment_level", "min_payment_level"]]
 y = demo_stats[["merchant_zipcode"]]
 
+
+
 # Allow to use machine learning with categorical features.
 from sklearn.feature_extraction import DictVectorizer
 vec = DictVectorizer()
@@ -57,16 +59,24 @@ from sklearn.preprocessing import MultiLabelBinarizer
 mlb = MultiLabelBinarizer()
 y_multilabel = mlb.fit_transform(y.values.ravel())
 
+
+PRC = 0.2
+X_train, X_test, y_train, y_test = cross_validation.train_test_split(X_vectorized, y_multilabel, test_size=PRC)
+
+
 # OneVsRest
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import classification_report
 
 classifier = OneVsRestClassifier(
                 SGDClassifier(
                     loss= 'hinge',
                     alpha=0.00001,
-                    penalty='elasticnet')).fit(X_vectorized, y_multilabel)
+                    penalty='l2')).fit(X_train, y_train)
 
+y_predicted= classifier.predict(X_test)
+print classification_report(y_test, y_predicted)
 
 # Predict new examples
 example = {'age_interval': '35-44',
