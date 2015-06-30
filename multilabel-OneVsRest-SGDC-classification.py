@@ -48,7 +48,6 @@ X = demo_stats[["weekday","age_interval", "gender",  "max_payment_level", "min_p
 y = demo_stats[["merchant_zipcode"]]
 
 
-
 # Allow to use machine learning with categorical features.
 from sklearn.feature_extraction import DictVectorizer
 vec = DictVectorizer()
@@ -63,27 +62,36 @@ y_multilabel = mlb.fit_transform(y.values.ravel())
 PRC = 0.2
 X_train, X_test, y_train, y_test = cross_validation.train_test_split(X_vectorized, y_multilabel, test_size=PRC)
 
-
 # OneVsRest
 from sklearn.multiclass import OneVsRestClassifier
-from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import classification_report
 
-classifier = OneVsRestClassifier(
-                SGDClassifier(
-                    loss= 'hinge',
-                    alpha=0.00001,
-                    penalty='l2')).fit(X_train, y_train)
+from sklearn import tree
+classifier = OneVsRestClassifier(tree.DecisionTreeClassifier(criterion="entropy",
+                                                             max_features="log2"))
+#from sklearn import ensemble
+#classifier = ensemble.RandomForestClassifier(criterion="entropy",
+#                                             max_features="log2",
+#                                             n_estimators= 500)
 
-y_predicted= classifier.predict(X_test)
+#from sklearn import svm
+#classifier = OneVsRestClassifier(svm.SVC(kernel='linear'))
+
+classifier.fit(X_train, y_train)
+
+y_predicted = classifier.predict(X_test)
+
+# Interpret carefully since it is a multilabel classification
 print classification_report(y_test, y_predicted)
 
 # Predict new examples
-example = {'age_interval': '35-44',
+example = {
+  'age_interval': '35-44',
   'max_payment_level': 'low',
   'min_payment_level': 'low',
-  'gender': 'male',
-  'weekday': '5'}
+  'gender': 'female',
+  'weekday': '5'
+ }
 
 example_vectorized = vec.transform(example).toarray()
 example_predicted =  classifier.predict(example_vectorized)
@@ -91,11 +99,13 @@ print "Person that can not spend lot of money on restaurant:"
 print mlb.inverse_transform(example_predicted)
 print "\n\n"
 
-example = {'age_interval': '35-44',
+example = {
+  'age_interval': '45-54',
   'max_payment_level': 'high',
   'min_payment_level': 'high',
   'gender': 'male',
-  'weekday': '5'}
+  'weekday': '5'
+  }
 example_vectorized = vec.transform(example).toarray()
 example_predicted =  classifier.predict(example_vectorized)
 print "Person that can spend more money on restaurant:"
