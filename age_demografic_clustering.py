@@ -42,35 +42,31 @@ demo_stats["amount"] = demo_stats["payments"] * demo_stats["avg_payment"]
 demo_stats["max_payment_level"] = pd.cut(demo_stats.max_payment, 7, labels = ["very-low", "low", "low-medium", "medium", "medium-high", "high", "very-high"])
 demo_stats["min_payment_level"] = pd.cut(demo_stats.min_payment, 7, labels = ["very-low", "low", "low-medium", "medium", "medium-high", "high", "very-high"])
 
-#TODO calculate the mean for max_payment and min_payment when we aggregate by "age_interval", "gender", "weekday", "merchant_zipcode" and
-# introduce it on the clustering
+demo_stats = demo_stats[["merchant_zipcode", "category", "weekday", "age_interval", "gender", "max_payment", "min_payment", "amount"]]
 
-demo_stats = demo_stats[["merchant_zipcode", "category", "weekday", "age_interval", "gender", "amount", "max_payment_level", "min_payment_level"]]
-
-# Aggregation by age_interval and
-gbcn = pd.pivot_table(demo_stats, values = "amount", index=["age_interval", "gender", "weekday", "merchant_zipcode"], columns=["category"],
-                      aggfunc=np.sum, fill_value=0 )
+gbcn = demo_stats.groupby(["merchant_zipcode", "age_interval"]).aggregate({"amount": np.mean, "max_payment": np.mean, "min_payment": np.mean})
 
 gbcn_reset = gbcn.reset_index()
 from sklearn.feature_extraction import DictVectorizer
-categorical = gbcn_reset[["age_interval", "gender", "merchant_zipcode", "weekday"]]
+categorical = gbcn_reset[["merchant_zipcode", "age_interval"]]
 vec = DictVectorizer()
 categorical_features = vec.fit_transform(categorical.to_dict("records"))
 
 from scipy.sparse import hstack
-numerical_features = gbcn_reset[['es_barsandrestaurants']]
+numerical_features = gbcn_reset[['amount', 'min_payment', 'max_payment']]
 X = hstack([categorical_features, numerical_features])
 
+#from sklearn.preprocessing import scale
+#X = scale(X.todense())
 
 # ---------------------------------------------------------------------
 # We can cluster similar age and gender behaviours through categories.
 
-n_clusters = 10
-
+n_clusters = 5
 
 kmeans = cluster.KMeans(init='k-means++',n_clusters= n_clusters)
 y_pred = kmeans.fit_predict(X)
 for n in range(n_clusters):
-    print "Cluster "+ str(n) + ":\n " + str([categorical.loc[i].to_dict() for i, item in enumerate(y_pred) if item == n ]) + "\n"
+    print "Cluster "+ str(n) + ":\n " + str([gbcn_reset.loc[i].to_dict() for i, item in enumerate(y_pred) if item == n ]) + "\n"
 
 
