@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Quick Start Guide Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="http://leafletjs.com/dist/leaflet.css" />
+</head>
+<body>
+<div id="map" style="width: 1250px; height: 650px"></div>
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://leafletjs.com/dist/leaflet.js"></script>
+<script>
+
+    var map = L.map('map').setView([41.4716,2.1926], 10);
+
+    L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
+        maxZoom: 10,
+        attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+        '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+        id: 'examples.map-i875mjb7'
+    }).addTo(map);
+
+
+    L.marker([41.4716,2.1926]).addTo(map)
+            .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+    L.circle([41.4716,2.0926], 500, {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5
+    }).addTo(map).bindPopup("I am a circle.");
+
+    L.polygon([
+        [41.4716,2.0926],
+        [41.5716,2.7926],
+        [41.1716,2.3926]
+    ]).addTo(map).bindPopup("I am a polygon.");
+
+
+
+    // get color depending on population density value
+    function getColor(d) {
+        return d > 1000 ? '#800026' :
+                d > 500  ? '#BD0026' :
+                d > 200  ? '#E31A1C' :
+                d > 100  ? '#FC4E2A' :
+                d > 50   ? '#FD8D3C' :
+                d > 20   ? '#FEB24C' :
+                d > 10   ? '#FED976' :
+                '#FFEDA0';
+    }
+
+    function style(feature) {
+        return {
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.7,
+            fillColor: getColor(25)
+        };
+    }
+
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera) {
+            layer.bringToFront();
+        }
+
+        info.update(layer.feature.properties);
+    }
+
+    var geojson;
+
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+        info.update();
+    }
+
+    function zoomToFeature(e) {
+        map.fitBounds(e.target.getBounds());
+    }
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        });
+    }
+
+
+    cps={};
+    $.getJSON("cp_cat_merchant_zipcode.geojson", function(json) {
+        console.log('cp_cat cargado');
+        cps=json;
+        geojson = L.geoJson(cps, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+    });
+
+
+
+
+    var popup = L.popup();
+
+    function onMapClick(e) {
+        popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(map);
+    }
+
+    map.on('click', onMapClick);
+
+</script>
+</body>
+</html>
