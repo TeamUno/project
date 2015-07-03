@@ -21,22 +21,6 @@
         maxZoom: 19
     }).addTo(map);
 
-    L.marker([41.4716,2.1926]).addTo(map)
-            .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
-
-    L.circle([41.4716,2.0926], 500, {
-        color: 'red',
-        fillColor: '#f03',
-        fillOpacity: 0.5
-    }).addTo(map).bindPopup("I am a circle.");
-
-    L.polygon([
-        [41.4716,2.0926],
-        [41.5716,2.7926],
-        [41.1716,2.3926]
-    ]).addTo(map).bindPopup("I am a polygon.");
-
-
 
     // get color depending on population density value
     function getColor(d) {
@@ -68,7 +52,7 @@
             weight: 5,
             color: '#666',
             dashArray: '',
-            fillOpacity: 0.7
+            fillOpacity: 0.3
         });
 
         if (!L.Browser.ie && !L.Browser.opera) {
