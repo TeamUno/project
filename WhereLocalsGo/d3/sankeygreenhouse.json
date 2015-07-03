@@ -1,0 +1,17 @@
+{
+  "links": [
+    {"source":"unknown","target":"08172","value":"1010584.06"},
+    {"source":"08173","target":"08172","value":"102016.94"},
+    {"source":"08195","target":"08172","value":"27896.80"},
+    {"source":"08190","target":"08172","value":"19308.70"},
+    {"source":"08172","target":"08006","value":"564.60"}
+
+  ] ,
+  "nodes": [
+    {"name":"08172"},
+    {"name":"unknown"},
+    {"name":"08173"},
+    {"name":"08195"},
+    {"name":"08190"},
+    {"name":"08006"}
+  ] }
