@@ -40,13 +40,24 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   $stateProvider
 
   // setup an abstract state for the tabs directive
-    .state('tab', {
+  .state('tab', {
     url: "/tab",
     abstract: true,
     templateUrl: "/static/views/tabs.html"
   })
 
   // Each tab has its own nav history stack:
+
+  .state('tab.map', {
+    cache: false,
+    url: '/map',
+    views: {
+      'tab-map': {
+        templateUrl: '/static/views/tab-map.html',
+        controller: 'MapCtrl'
+      }
+    }
+  })
 
   .state('tab.dash', {
     cache: false,
