@@ -3,13 +3,15 @@
 <head>
     <title>Leaflet Quick Start Guide Example</title>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="http://leafletjs.com/dist/leaflet.css" />
     <style>
-
-        #map {
-            width: 800px;
-            height: 500px;
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
         }
 
         .info {
@@ -41,18 +43,15 @@
     </style>
 </head>
 <body>
-<div id="map" style="width: 1250px; height: 650px"></div>
+<div id="map"></div>
 <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
 <script src="http://leafletjs.com/dist/leaflet.js"></script>
 <script>
 
-    var map = L.map('map').setView([41.4716,2.1926], 10);
+    var map = L.map('map').setView([41.38254, 2.15769], 13);
 
-
-    L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
+    L.tileLayer('http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
+        attribution: 'Tiles courtesy of <a href="http://openstreetmap.se/" target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
     // control that shows state info on hover
@@ -74,26 +73,14 @@
 
     info.addTo(map);
 
-    // get color depending on population density value
-    function getColor(d) {
-        return d > 0.9 ? '#800026' :
-                d > 0.8  ? '#BD0026' :
-                d > 0.7  ? '#E31A1C' :
-                d > 0.6  ? '#FC4E2A' :
-                d > 0.5   ? '#FD8D3C' :
-                d > 0.2   ? '#FEB24C' :
-                d > 0.1   ? '#FED976' :
-                '#FFEDA0';
-    }
-
     function style(feature) {
         return {
             weight: 2,
             opacity: 1,
             color: 'white',
             dashArray: '3',
-            fillOpacity: 0.7,
-            fillColor: getColor(feature.properties.ratingFS)
+            fillOpacity: feature.properties.ratingFS/1.1,
+            fillColor: 'rgb(0,0,'+Math.ceil(Math.sqrt(1-feature.properties.priceFS)*255)+ ')'
         };
     }
 
