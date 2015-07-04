@@ -122,7 +122,7 @@
 
 
     cps={};
-    $.getJSON("best_cat.geojson", function(json) {
+    $.getJSON("../data/best_cat.geojson", function(json) {
         console.log('cp_cat cargado');
         cps=json;
         geojson = L.geoJson(cps, {
