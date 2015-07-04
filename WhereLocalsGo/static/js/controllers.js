@@ -1,6 +1,10 @@
 angular.module('starter.controllers', [])
 
 
+.controller('MapCtrl', function($rootScope) {
+
+})
+
 .controller('PlacesCtrl', function($scope, $rootScope, Places) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
