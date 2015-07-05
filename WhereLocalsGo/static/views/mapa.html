@@ -52,10 +52,8 @@
     var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', 
 	'http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png',
 	'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png']
-    var atrib = ['&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> 	contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>', 
-		'Tiles courtesy of <a href="http://openstreetmap.se/" 	target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a 	href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>']
     L.tileLayer(tile[2], {
-        attribution: atrib[0]
+        attribution: 'testTeamUNO'
     }).addTo(map);
 
     // control that shows state info on hover
@@ -153,9 +151,14 @@
 
     legend.addTo(map);
 
+    //get parametres from querystring
+    function get(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
 
     cps={};
-    $.getJSON("../data/best_bcn.geojson", function(json) {
+    $.getJSON("../data/best_bcn.geojson?preferences="+ get('preferences'), function(json) {
         console.log('cp_cat cargado');
         cps=json;
         geojson = L.geoJson(cps, {
