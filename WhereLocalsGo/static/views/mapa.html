@@ -49,9 +49,11 @@
 <script>
 
     var map = L.map('map').setView([41.38254, 2.15769], 12);
-
-    L.tileLayer('http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png', {
-        attribution: 'Tiles courtesy of <a href="http://openstreetmap.se/" target="_blank">OpenStreetMap Sweden</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', 
+	'http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png',
+	'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png']
+    L.tileLayer(tile[2], {
+        attribution: 'testTeamUNO'
     }).addTo(map);
 
     // control that shows state info on hover
@@ -65,22 +67,31 @@
 
     info.update = function (props) {
         if(props) {
-            this._div.innerHTML = '<h4>' + props.zipcode + '</h4>' + (props ?
-                    '<b>ratingFS:' + props.ratingFS + '</b><br />priceFS:' + props.priceFS
+            this._div.innerHTML = '<h4> zipcode: ' + props.merchant_zipcode + '</h4>' + (props ?
+                    '<b>rating:' + props.ratingFS + '</b><br />price:' + props.priceFS
+		     + '</b><br />counts:' + props.countsFS
                             : 'Hover over a zipcode');
         }
     };
 
     info.addTo(map);
-
+    
+    function getColor(d) {
+    	return d > 9 ? '#253494' :
+               d > 8 ? '#2c7fb8' :
+               d > 7 ? '#41b6c4' :
+               d > 6 ? '#a1dab4' :
+               d > 5 ? '#ffffcc' :
+                       '#ffffff';
+    }
     function style(feature) {
         return {
-            weight: 2,
+            weight: 0.75,
             opacity: 1,
-            color: 'white',
+            color: 'yellow',
             dashArray: '3',
-            fillOpacity: feature.properties.ratingFS/1.1,
-            fillColor: 'rgb(0,0,'+Math.ceil(Math.sqrt(1-feature.properties.priceFS)*255)+ ')'
+            fillOpacity: feature.properties.ratingFS > 5 ? 0.7 : 0.2,
+            fillColor: getColor(feature.properties.ratingFS)
         };
     }
 
@@ -88,10 +99,10 @@
         var layer = e.target;
 
         layer.setStyle({
-            weight: 5,
-            color: '#666',
+            weight: 2,
+            color: 'yellow',
             dashArray: '',
-            fillOpacity: 0.3
+            fillOpacity: 0.9
         });
 
         if (!L.Browser.ie && !L.Browser.opera) {
@@ -119,10 +130,35 @@
             click: zoomToFeature
         });
     }
+    
+    var legend = L.control({position: 'bottomright'});
 
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [6, 7, 8, 9, 10],
+            labels = [];
+
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = grades.length-1; i >= 0; i--) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i]) + '"></i> ' +
+                (grades[i-1] ? grades[i-1] : '5') + (grades[i] ? '&ndash;' + grades[i] + '<br>' : '+');
+        }
+
+        return div;
+    };
+
+    legend.addTo(map);
+
+    //get parametres from querystring
+    function get(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
 
     cps={};
-    $.getJSON("../data/best_cat.geojson", function(json) {
+    $.getJSON("../data/best_bcn.geojson?preferences="+ get('preferences'), function(json) {
         console.log('cp_cat cargado');
         cps=json;
         geojson = L.geoJson(cps, {
@@ -130,7 +166,6 @@
             onEachFeature: onEachFeature
         }).addTo(map);
     });
-
 
 
 
