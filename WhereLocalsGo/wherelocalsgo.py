@@ -1,18 +1,25 @@
 import os
 from tornado import ioloop,web
 from tornado.escape import json_encode
-from pymongo import MongoClient
+import pymongo
 import json
 from bson import json_util
 from bson.objectid import ObjectId
+import datetime
 
 
 MONGODB_DB_URL = os.environ.get('OPENSHIFT_MONGODB_DB_URL') if os.environ.get('OPENSHIFT_MONGODB_DB_URL') else 'mongodb://localhost:27017/'
 MONGODB_DB_NAME = os.environ.get('OPENSHIFT_APP_NAME') if os.environ.get('OPENSHIFT_APP_NAME') else 'wherelocalsgo'
 
-client = MongoClient(MONGODB_DB_URL)
+client = pymongo.MongoClient(MONGODB_DB_URL)
 db = client[MONGODB_DB_NAME]
 
+age_ranges = { "<25":   range(0, 25),
+               "25-34": range(25, 35),
+               "35-44": range(35, 45),
+               "45-54": range(45, 55),
+               "55-65": range(55, 65),
+               ">65":   range(65, 100) }
 
 class IndexHandler(web.RequestHandler):
     def get(self):
@@ -22,20 +29,36 @@ class IndexHandler(web.RequestHandler):
 class PlacesHandler(web.RequestHandler):
     def post(self):
         preference_data = {}
+        gender = ""
+        age_interval = ""
         if self.request.body != "":
             preference_data = json.loads(self.request.body)
-            
         if preference_data["gender"] != '':
-            query={'zipcode': {'$gt': 8000, '$lt': 9000},'gender': preference_data["gender"]}
-        else:
-            query={'zipcode': {'$gt': 8000, '$lt': 9000} }
-        
-        cp = db.demographic_distribution.aggregate([{'$match': query}, {'$project': {'zipcode': 1, '_id': 0, 'total': {'$multiply': ["$avg", "$payment"]}}}, {'$sort': {'total': -1}}])
-        
-        listcp = list(cp)
-        places = db.places.find({'postal-code': listcp[0]['zipcode']})[:3]
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(list(places), default=json_util.default))
+            gender = preference_data["gender"]
+        if preference_data["age"] != '':
+            for key, ranges in age_ranges.iteritems():
+                if int(preference_data["age"]) in ranges:
+                   age_interval = key
+
+        weekday = str(datetime.date.today().weekday())
+
+        zipcode_aggregation = db.merchant_zipcode_aggregation.find({ "age_interval": age_interval,
+                                                          "gender": gender,
+                                                          "weekday": weekday }).sort("payments_proportion", pymongo.DESCENDING)
+
+        geo_json = db.merchant_zipcode_coordinates.find().next()
+        for aggregation in zipcode_aggregation:
+            index = next(index  for (index, feature) in enumerate(geo_json['features']) if feature['properties']['zipcode'] == aggregation['merchant_zipcode'])
+            geo_json['features'][index]["properties"]["payments_proportion"] = aggregation['payments_proportion']
+
+
+        #TODO writing to a file? FIX. json.dump not working with geo_json.
+        #with open("merchant_zipcode.geo_json", "w") as fp:
+        #    json.dump(geo_json, fp)
+
+        #TODO sending geo_json via request? FIX. json.dumps not working with geo_json
+        #self.set_header("Content-Type", "application/json")
+        #self.write(json.dumps(geo_json), default=json_util.default))
 
 
 class PlaceHandler(web.RequestHandler):
