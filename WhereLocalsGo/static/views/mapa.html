@@ -151,9 +151,14 @@
 
     legend.addTo(map);
 
+    //get parametres from querystring
+    function get(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
 
     cps={};
-    $.getJSON("../data/best_bcn.geojson", function(json) {
+    $.getJSON("../data/best_bcn.geojson?preferences="+ get('preferences'), function(json) {
         console.log('cp_cat cargado');
         cps=json;
         geojson = L.geoJson(cps, {
