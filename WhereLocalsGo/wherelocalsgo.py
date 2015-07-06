@@ -32,15 +32,10 @@ class PlacesHandler(web.RequestHandler):
         if self.request.body != "":
             preference_data = json.loads(self.request.body)
 
-        if preference_data["gender"] != '':
-            query={'zipcode': {'$gt': 8000, '$lt': 9000},'gender': preference_data["gender"]}
-        else:
-            query={'zipcode': {'$gt': 8000, '$lt': 9000} }
+        if preference_data["zipcode"] != '':
+            query = {'postal-code': int(preference_data["zipcode"][1:])}
 
-        cp = db.demographic_distribution.aggregate([{'$match': query}, {'$project': {'zipcode': 1, '_id': 0, 'total': {'$multiply': ["$avg", "$payment"]}}}, {'$sort': {'total': -1}}])
-
-        listcp = list(cp)
-        places = db.places.find({'postal-code': listcp[0]['zipcode']})[:3]
+        places = db.places.find(query)[:3]
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(list(places), default=json_util.default))
 
