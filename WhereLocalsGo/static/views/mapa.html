@@ -67,7 +67,7 @@
 
     info.update = function (props) {
         if(props) {
-            this._div.innerHTML = '<h4> zipcode: ' + props.merchant_zipcode + '</h4>' + (props ?
+            this._div.innerHTML = '<h4> zipcode: ' + props.zipcode + '</h4>' + (props ?
                     '<b>rating:' + props.payments_proportion + '</b><br />price:' + props.payments_proportion
 		     + '</b><br />counts:' + props.countsFS
                             : 'Hover over a zipcode');
@@ -75,13 +75,13 @@
     };
 
     info.addTo(map);
-    
+
     function getColor(d) {
     	return d > 9 ? '#253494' :
                d > 8 ? '#2c7fb8' :
-               d > 7 ? '#41b6c4' :
-               d > 6 ? '#a1dab4' :
-               d > 5 ? '#ffffcc' :
+               d > 6 ? '#41b6c4' :
+               d > 3 ? '#a1dab4' :
+               d > 0 ? '#ffffcc' :
                        '#ffffff';
     }
     function style(feature) {
@@ -110,6 +110,17 @@
         }
 
         info.update(layer.feature.properties);
+        var zipcode=layer.feature.properties.zipcode;
+        $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
+            console.log('zip places');
+            places=json;
+            for(i=0;i<places.length;i++){
+                var marker = L.marker([places[i].latitude, places[i].longitude]).addTo(map);
+                marker.bindPopup(places[i].name);
+            }
+
+        },'json');
+
     }
 
     var geojson;
