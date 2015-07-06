@@ -42,12 +42,12 @@ demo_stats["weekday"] = demo_stats["date"].map(lambda d: (d.weekday()))
 demo_stats["weekday"] = demo_stats["weekday"].astype('string')
 
 gbcn = demo_stats.groupby(["gender", "age_interval", "weekday", "merchant_zipcode"]).aggregate({ "payments": np.sum })
-
 gbcn = gbcn.reset_index()
-total = demo_stats["payments"].sum()
-gbcn['payments_proportion'] = gbcn.payments / total
 
-zip_code_geojson = pygeoj.load(filepath="dataset/cp_cat_merchant_zipcode.geojson")
+total_by_zipcode = gbcn.groupby(["gender" , "age_interval", "weekday"])["payments"].max()
+gbcn['payments_proportion'] = gbcn.apply(lambda row: np.true_divide(row.payments, total_by_zipcode[row.gender, row.age_interval, row.weekday]), axis=1)
+
+zip_code_geojson = pygeoj.load(filepath="dataset/best_bcn.geojson")
 
 geojson = {
     "type": "FeatureCollection",
