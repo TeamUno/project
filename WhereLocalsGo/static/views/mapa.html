@@ -49,7 +49,7 @@
 <script>
 
     var map = L.map('map').setView([41.38254, 2.15769], 12);
-    var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', 
+    var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
 	'http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png',
 	'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png']
     L.tileLayer(tile[2], {
@@ -90,8 +90,8 @@
             opacity: 1,
             color: 'yellow',
             dashArray: '3',
-            fillOpacity: feature.properties.payments_proportion > 5 ? 0.7 : 0.2,
-            fillColor: getColor(feature.properties.payments_proportion)
+            fillOpacity: (feature.properties.payments_proportion * 10) > 5 ? 0.7 : 0.2,
+            fillColor: getColor(feature.properties.payments_proportion * 10)
         };
     }
 
@@ -143,7 +143,7 @@
             click: zoomToFeature
         });
     }
-    
+
     var legend = L.control({position: 'bottomright'});
 
     legend.onAdd = function (map) {
