@@ -69,20 +69,20 @@
 
     info.update = function (props) {
         if(props) {
+
             this._div.innerHTML = '<h4> zipcode: ' + props.zipcode + '</h4>' + (props ?
-                    '<b>rating:' + props.payments_proportion + '</b><br />price:' + props.payments_proportion
-		     + '</b><br />counts:' + props.countsFS
-                            : 'Hover over a zipcode');
+                    '<b>rating:' + props.payments_proportion.toFixed(1)*10
+		            : 'Hover over a zipcode');
         }
     };
 
     info.addTo(map);
 
     function getColor(d) {
-    	return d > 9 ? '#253494' :
-               d > 8 ? '#2c7fb8' :
-               d > 6 ? '#41b6c4' :
-               d > 3 ? '#a1dab4' :
+    	return d >= 9 ? '#253494' :
+               d >= 8 ? '#2c7fb8' :
+               d >= 6 ? '#41b6c4' :
+               d >= 3 ? '#a1dab4' :
                d > 0 ? '#ffffcc' :
                        '#ffffff';
     }
@@ -92,7 +92,8 @@
             opacity: 1,
             color: 'yellow',
             dashArray: '3',
-            fillOpacity: (feature.properties.payments_proportion * 10) > 5 ? 0.7 : 0.2,
+            fillOpacity: (feature.properties.payments_proportion * 10) >= 5 ? 0.8 :
+                            (feature.properties.payments_proportion * 10) >= 2 ? 0.6 : 0.01,
             fillColor: getColor(feature.properties.payments_proportion * 10)
         };
     }
@@ -193,18 +194,6 @@
         }).addTo(map);
     },'json');
 
-
-
-    var popup = L.popup();
-
-    function onMapClick(e) {
-        popup
-                .setLatLng(e.latlng)
-                .setContent("You clicked the map at " + e.latlng.toString())
-                .openOn(map);
-    }
-
-    map.on('click', onMapClick);
 
     function onLocationFound(e) {
         var radius = e.accuracy / 2;
