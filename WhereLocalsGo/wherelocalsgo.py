@@ -29,6 +29,32 @@ class IndexHandler(web.RequestHandler):
 class PlacesHandler(web.RequestHandler):
     def post(self):
         preference_data = {}
+        if self.request.body != "":
+            preference_data = json.loads(self.request.body)
+
+        if preference_data["gender"] != '':
+            query={'zipcode': {'$gt': 8000, '$lt': 9000},'gender': preference_data["gender"]}
+        else:
+            query={'zipcode': {'$gt': 8000, '$lt': 9000} }
+
+        cp = db.demographic_distribution.aggregate([{'$match': query}, {'$project': {'zipcode': 1, '_id': 0, 'total': {'$multiply': ["$avg", "$payment"]}}}, {'$sort': {'total': -1}}])
+
+        listcp = list(cp)
+        places = db.places.find({'postal-code': listcp[0]['zipcode']})[:3]
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(list(places), default=json_util.default))
+
+
+class PlaceHandler(web.RequestHandler):
+    def get(self, place_id):
+        place = db.places.find_one({"_id": ObjectId(str(place_id))})
+        self.set_header("Content-Type", "application/json")
+        self.write(json.dumps(place, default=json_util.default))
+
+
+class MapsHandler(web.RequestHandler):
+    def post(self):
+        preference_data = {}
         gender = ""
         age_interval = ""
         if self.request.body != "":
@@ -42,31 +68,24 @@ class PlacesHandler(web.RequestHandler):
 
         weekday = str(datetime.date.today().weekday())
 
-        zipcode_aggregation = db.merchant_zipcode_aggregation.find({ "age_interval": age_interval,
-                                                          "gender": gender,
-                                                          "weekday": weekday }).sort("payments_proportion", pymongo.DESCENDING)
+        if preference_data["gender"] != '':
+            query={ "age_interval": age_interval,
+                          "gender": gender,
+                          "weekday": weekday }
+        else:
+            query={ "age_interval": age_interval,
+                          "weekday": weekday }
 
-        geo_json = db.merchant_zipcode_coordinates.find().next()
+        zipcode_aggregation = db.merchant_zipcode_aggregation.find(query).sort("payments_proportion", pymongo.DESCENDING)
+
+        geo_json = db.merchant_zipcode_coordinates.find({}, {"_id": 0}).next()
+        geo_json_aux = geo_json
         for aggregation in zipcode_aggregation:
             index = next(index  for (index, feature) in enumerate(geo_json['features']) if feature['properties']['zipcode'] == aggregation['merchant_zipcode'])
-            geo_json['features'][index]["properties"]["payments_proportion"] = aggregation['payments_proportion']
+            geo_json_aux['features'][index]["properties"]["payments_proportion"] = aggregation['payments_proportion']
 
-
-        #TODO writing to a file? FIX. json.dump not working with geo_json.
-        #with open("merchant_zipcode.geo_json", "w") as fp:
-        #    json.dump(geo_json, fp)
-
-        #TODO sending geo_json via request? FIX. json.dumps not working with geo_json
-        #self.set_header("Content-Type", "application/json")
-        #self.write(json.dumps(geo_json), default=json_util.default))
-
-
-class PlaceHandler(web.RequestHandler):
-    def get(self, place_id):
-        place = db.places.find_one({"_id": ObjectId(str(place_id))})
         self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(place, default=json_util.default))
-
+        self.write(geo_json_aux)
 
 settings = {
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
@@ -78,7 +97,8 @@ application = web.Application([
     (r'/', IndexHandler),
     (r'/index', IndexHandler),
     (r'/api/v1/places', PlacesHandler),
-    (r'/api/v1/places/(.*)', PlaceHandler)
+    (r'/api/v1/places/(.*)', PlaceHandler),
+    (r'/api/v1/maps', MapsHandler)
 ], **settings)
 
 if __name__ == "__main__":
