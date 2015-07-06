@@ -68,7 +68,7 @@
     info.update = function (props) {
         if(props) {
             this._div.innerHTML = '<h4> zipcode: ' + props.merchant_zipcode + '</h4>' + (props ?
-                    '<b>rating:' + props.ratingFS + '</b><br />price:' + props.priceFS
+                    '<b>rating:' + props.payments_proportion + '</b><br />price:' + props.payments_proportion
 		     + '</b><br />counts:' + props.countsFS
                             : 'Hover over a zipcode');
         }
@@ -90,8 +90,8 @@
             opacity: 1,
             color: 'yellow',
             dashArray: '3',
-            fillOpacity: feature.properties.ratingFS > 5 ? 0.7 : 0.2,
-            fillColor: getColor(feature.properties.ratingFS)
+            fillOpacity: feature.properties.payments_proportion*6000 > 5 ? 0.7 : 0.2,
+            fillColor: getColor(feature.properties.payments_proportion*6000)
         };
     }
 
@@ -158,14 +158,14 @@
     }
 
     cps={};
-    $.getJSON("../data/best_bcn.geojson?preferences="+ get('preferences'), function(json) {
+    $.post("/api/v1/maps",get('preferences'), function(json) {
         console.log('cp_cat cargado');
         cps=json;
         geojson = L.geoJson(cps, {
             style: style,
             onEachFeature: onEachFeature
         }).addTo(map);
-    });
+    },'json');
 
 
 

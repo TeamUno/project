@@ -11,15 +11,14 @@ import pymongo
 
 # Connection to Mongo DB
 try:
-    conn=pymongo.MongoClient()
+    client = pymongo.MongoClient()
 except pymongo.errors.ConnectionFailure, e:
    print "Could not connect to MongoDB: %s" % e
 
-conn.drop_database("merchant_zipcode_aggregation")
-conn.drop_database("merchant_zipcode_coordinates")
+db = client['wherelocalsgo']
 
-db = conn['merchant_zipcode_aggregation']
-db = conn['merchant_zipcode_coordinates']
+db.drop_collection("merchant_zipcode_aggregation")
+db.drop_collection("merchant_zipcode_coordinates")
 
 # Load datasets
 names = ["merchant_zipcode", "date", "category", "age_interval", "gender", "merchants", "cards", "payments", "avg_payment", "max_payment", "min_payment", "std"]
@@ -50,11 +49,26 @@ gbcn['payments_proportion'] = gbcn.payments / total
 
 zip_code_geojson = pygeoj.load(filepath="dataset/cp_cat_merchant_zipcode.geojson")
 
+geojson = {
+    "type": "FeatureCollection",
+    "features": []
+}
 for feature in zip_code_geojson:
     zipcode = feature.properties['merchant_zipcode']
-    db.merchant_zipcode_coordinates.insert({'merchant_zipcode': zipcode,
-                                            'coordinates': feature.geometry.coordinates })
+    feature = {
+        "type": "Feature",
+        "properties": {
+            "payments_proportion": "0",
+            "zipcode": zipcode
+        },
+        "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": feature.geometry.coordinates
+        }
+    }
+    geojson["features"].append(feature)
 
+db.merchant_zipcode_coordinates.insert(geojson)
 db.merchant_zipcode_aggregation.insert(gbcn.to_dict("records"))
 
 records = db.merchant_zipcode_aggregation.find({ "age_interval": "35-44",
@@ -70,5 +84,5 @@ zipcode = records.next()
 merchant_zipcode = zipcode['merchant_zipcode']
 payment_proportion = zipcode['payments_proportion']
 
-record = db.merchant_zipcode_coordinates.find({ "merchant_zipcode": merchant_zipcode })
+record = db.merchant_zipcode_aggregation.find({ "merchant_zipcode": merchant_zipcode })
 print record.next()
