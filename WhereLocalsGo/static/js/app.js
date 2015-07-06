@@ -48,6 +48,18 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
   // Each tab has its own nav history stack:
 
+
+
+  .state('tab.account', {
+    url: '/account',
+    views: {
+      'tab-account': {
+        templateUrl: '/static/views/tab-account.html',
+        controller: 'AccountCtrl'
+      }
+    }
+  })
+      
   .state('tab.map', {
     cache: false,
     url: '/map',
@@ -68,19 +80,9 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         controller: 'PlacesCtrl'
       }
     }
-  })
-
-  .state('tab.account', {
-    url: '/account',
-    views: {
-      'tab-account': {
-        templateUrl: '/static/views/tab-account.html',
-        controller: 'AccountCtrl'
-      }
-    }
   });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/map');
+  $urlRouterProvider.otherwise('/tab/account');
 
 });

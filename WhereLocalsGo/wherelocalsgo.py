@@ -33,9 +33,9 @@ class PlacesHandler(web.RequestHandler):
             preference_data = json.loads(self.request.body)
 
         if preference_data["zipcode"] != '':
-            query = {'postal-code': int(preference_data["zipcode"][1:])}
+            query = {'zipcode': preference_data["zipcode"]}
 
-        places = db.places.find(query)[:3]
+        places = db.places.find(query)
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(list(places), default=json_util.default))
 
