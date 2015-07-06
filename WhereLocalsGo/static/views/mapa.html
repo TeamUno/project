@@ -49,6 +49,8 @@
 <script>
 
     var map = L.map('map').setView([41.38254, 2.15769], 12);
+    //map.maxBounds([41.3160276073,2.1027998924],[41.4463695625,2.2629470825]);
+
     var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
 	'http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png',
 	'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png']
@@ -203,6 +205,23 @@
     }
 
     map.on('click', onMapClick);
+
+    function onLocationFound(e) {
+        var radius = e.accuracy / 2;
+
+        L.circle(e.latlng,15, {
+            color: 'blue',
+            fillColor: 'blue',
+            fillOpacity: 0.8
+        }).addTo(map)
+                .bindPopup("You are here").openPopup();
+
+        L.circle(e.latlng, radius).addTo(map);
+    }
+
+    map.on('locationfound', onLocationFound);
+
+    map.locate({setView: false});
 
 </script>
 </body>
