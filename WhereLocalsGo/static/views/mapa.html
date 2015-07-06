@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Quick Start Guide Example</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="http://leafletjs.com/dist/leaflet.css" />
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+        }
+
+        .info {
+            padding: 6px 8px;
+            font: 14px/16px Arial, Helvetica, sans-serif;
+            background: white;
+            background: rgba(255,255,255,0.8);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+        .info h4 {
+            margin: 0 0 5px;
+            color: #777;
+        }
+
+        .legend {
+            text-align: left;
+            line-height: 18px;
+            color: #555;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7;
+        }
+
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://leafletjs.com/dist/leaflet.js"></script>
+<script>
+
+    var map = L.map('map').setView([41.38254, 2.15769], 12);
+    var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
+	'http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png',
+	'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png']
+    L.tileLayer(tile[2], {
+        attribution: 'testTeamUNO'
+    }).addTo(map);
+
+    // control that shows state info on hover
+    var info = L.control();
+
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info');
+        this.update();
+        return this._div;
+    };
+
+    info.update = function (props) {
+        if(props) {
+            this._div.innerHTML = '<h4> zipcode: ' + props.zipcode + '</h4>' + (props ?
+                    '<b>rating:' + props.payments_proportion + '</b><br />price:' + props.payments_proportion
+		     + '</b><br />counts:' + props.countsFS
+                            : 'Hover over a zipcode');
+        }
+    };
+
+    info.addTo(map);
+
+    function getColor(d) {
+    	return d > 9 ? '#253494' :
+               d > 8 ? '#2c7fb8' :
+               d > 6 ? '#41b6c4' :
+               d > 3 ? '#a1dab4' :
+               d > 0 ? '#ffffcc' :
+                       '#ffffff';
+    }
+    function style(feature) {
+        return {
+            weight: 0.75,
+            opacity: 1,
+            color: 'yellow',
+            dashArray: '3',
+            fillOpacity: (feature.properties.payments_proportion * 10) > 5 ? 0.7 : 0.2,
+            fillColor: getColor(feature.properties.payments_proportion * 10)
+        };
+    }
+
+    function highlightFeature(e) {
+        var layer = e.target;
+
+        layer.setStyle({
+            weight: 2,
+            color: 'yellow',
+            dashArray: '',
+            fillOpacity: 0.05
+        });
+
+        if (!L.Browser.ie && !L.Browser.opera) {
+            layer.bringToFront();
+        }
+
+        info.update(layer.feature.properties);
+
+    }
+
+    var geojson;
+
+    function resetHighlight(e) {
+        geojson.resetStyle(e.target);
+        info.update();
+    }
+
+    markers = new L.FeatureGroup();
+    function zoomToFeature(e) {
+        markers.clearLayers();
+        var zipcode= e.target.feature.properties.zipcode;
+        $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
+            places=json;
+            for(i=0;i<places.length;i++){
+                var marker = L.marker([places[i].latitude, places[i].longitude]);
+                marker.bindPopup('<b>'+ places[i].name + '</b><br/>'
+                                    + places[i].address + '<br/>'
+                                    + places[i].phone + '<br/>'
+                                    + places[i].category);
+                markers.addLayer(marker);
+            }
+            map.addLayer(markers);
+
+        },'json');
+        map.fitBounds(e.target.getBounds());
+    }
+
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        });
+    }
+
+    var legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [6, 7, 8, 9, 10],
+            labels = [];
+
+        // loop through our density intervals and generate a label with a colored square for each interval
+        for (var i = grades.length-1; i >= 0; i--) {
+            div.innerHTML +=
+                '<i style="background:' + getColor(grades[i]) + '"></i> ' +
+                (grades[i-1] ? grades[i-1] : '5') + (grades[i] ? '&ndash;' + grades[i] + '<br>' : '+');
+        }
+
+        return div;
+    };
+
+    legend.addTo(map);
+
+    //get parametres from querystring
+    function get(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+            return decodeURIComponent(name[1]);
+    }
+
+    cps={};
+    $.post("/api/v1/maps",get('preferences'), function(json) {
+        console.log('cp_cat cargado');
+        cps=json;
+        geojson = L.geoJson(cps, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+    },'json');
+
+
+
+    var popup = L.popup();
+
+    function onMapClick(e) {
+        popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(map);
+    }
+
+    map.on('click', onMapClick);
+
+</script>
+</body>
+</html>
