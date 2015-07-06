@@ -120,17 +120,21 @@
         info.update();
     }
 
+    markers = new L.FeatureGroup();
     function zoomToFeature(e) {
+        markers.clearLayers();
         var zipcode= e.target.feature.properties.zipcode;
         $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
             places=json;
             for(i=0;i<places.length;i++){
-                var marker = L.marker([places[i].latitude, places[i].longitude]).addTo(map);
+                var marker = L.marker([places[i].latitude, places[i].longitude]);
                 marker.bindPopup('<b>'+ places[i].name + '</b><br/>'
                                     + places[i].street_address + '<br/>'
                                     + places[i].telephone + '<br/>'
                                     + places[i].district);
+                markers.addLayer(marker);
             }
+            map.addLayer(markers);
 
         },'json');
         map.fitBounds(e.target.getBounds());
