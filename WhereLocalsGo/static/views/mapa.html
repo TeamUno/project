@@ -90,8 +90,8 @@
             opacity: 1,
             color: 'yellow',
             dashArray: '3',
-            fillOpacity: feature.properties.payments_proportion*6000 > 5 ? 0.7 : 0.2,
-            fillColor: getColor(feature.properties.payments_proportion*6000)
+            fillOpacity: feature.properties.payments_proportion > 5 ? 0.7 : 0.2,
+            fillColor: getColor(feature.properties.payments_proportion)
         };
     }
 
