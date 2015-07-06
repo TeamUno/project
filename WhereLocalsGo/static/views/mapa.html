@@ -129,9 +129,9 @@
             for(i=0;i<places.length;i++){
                 var marker = L.marker([places[i].latitude, places[i].longitude]);
                 marker.bindPopup('<b>'+ places[i].name + '</b><br/>'
-                                    + places[i].street_address + '<br/>'
-                                    + places[i].telephone + '<br/>'
-                                    + places[i].district);
+                                    + places[i].address + '<br/>'
+                                    + places[i].phone + '<br/>'
+                                    + places[i].category);
                 markers.addLayer(marker);
             }
             map.addLayer(markers);
