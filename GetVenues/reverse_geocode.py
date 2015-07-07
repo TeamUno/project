@@ -59,11 +59,7 @@ b = [u'Mediterranean Restaurant', u'Restaurant', u'Caf\xe9',
 
 
 for u in venuesFS.find({'$and': [{u'zipcode': {'$eq': None}},
-                                {'category': {'$in': b}},
-                                {'rating': {'$ne': None}},
-                                {'price': {'$ne': None}}]}):
-    print str(u['latitude']) + ',' + str(u['longitude'])
-    print geolocator.reverse(str(u['latitude']) + ',' + str(u['longitude'])).address
+                                {'category': {'$in': b}}]}):
     try:
         u['zipcode'] = re.search(r'\d{5}', geolocator.reverse(str(u['latitude']) + ',' + str(u['longitude'])).address).group(0)
     except:
