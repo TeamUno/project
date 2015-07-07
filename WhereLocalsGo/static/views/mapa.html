@@ -49,6 +49,8 @@
 <script>
 
     var map = L.map('map').setView([41.38254, 2.15769], 12);
+    //map.maxBounds([41.3160276073,2.1027998924],[41.4463695625,2.2629470825]);
+
     var tile = ['http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',
 	'http://{s}.tile.openstreetmap.se/hydda/full/{z}/{x}/{y}.png',
 	'http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png']
@@ -67,20 +69,20 @@
 
     info.update = function (props) {
         if(props) {
+
             this._div.innerHTML = '<h4> zipcode: ' + props.zipcode + '</h4>' + (props ?
-                    '<b>rating:' + props.payments_proportion + '</b><br />price:' + props.payments_proportion
-		     + '</b><br />counts:' + props.countsFS
-                            : 'Hover over a zipcode');
+                    '<b>rating:' + props.payments_proportion.toFixed(1)*10
+		            : 'Hover over a zipcode');
         }
     };
 
     info.addTo(map);
 
     function getColor(d) {
-    	return d > 9 ? '#253494' :
-               d > 8 ? '#2c7fb8' :
-               d > 6 ? '#41b6c4' :
-               d > 3 ? '#a1dab4' :
+    	return d >= 9 ? '#253494' :
+               d >= 8 ? '#2c7fb8' :
+               d >= 6 ? '#41b6c4' :
+               d >= 3 ? '#a1dab4' :
                d > 0 ? '#ffffcc' :
                        '#ffffff';
     }
@@ -90,7 +92,8 @@
             opacity: 1,
             color: 'yellow',
             dashArray: '3',
-            fillOpacity: (feature.properties.payments_proportion * 10) > 5 ? 0.7 : 0.2,
+            fillOpacity: (feature.properties.payments_proportion * 10) >= 5 ? 0.8 :
+                            (feature.properties.payments_proportion * 10) >= 2 ? 0.6 : 0.01,
             fillColor: getColor(feature.properties.payments_proportion * 10)
         };
     }
@@ -121,21 +124,28 @@
     }
 
     markers = new L.FeatureGroup();
+    function updateMarkers(places){
+        for(i=0;i<places.length;i++){
+            var circle = L.circle([places[i].latitude, places[i].longitude], 15, {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.8
+            });
+            //var marker = L.marker([places[i].latitude, places[i].longitude]);
+            circle.bindPopup('<b>'+ places[i].name + '</b><br/>'
+                    + places[i].address + '<br/>'
+                    + places[i].phone + '<br/>'
+                    + places[i].category);
+            markers.addLayer(circle);
+        }
+        map.addLayer(markers);
+    }
+
     function zoomToFeature(e) {
         markers.clearLayers();
         var zipcode= e.target.feature.properties.zipcode;
         $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
-            places=json;
-            for(i=0;i<places.length;i++){
-                var marker = L.marker([places[i].latitude, places[i].longitude]);
-                marker.bindPopup('<b>'+ places[i].name + '</b><br/>'
-                                    + places[i].address + '<br/>'
-                                    + places[i].phone + '<br/>'
-                                    + places[i].category);
-                markers.addLayer(marker);
-            }
-            map.addLayer(markers);
-
+            updateMarkers(json);
         },'json');
         map.fitBounds(e.target.getBounds());
     }
@@ -185,17 +195,22 @@
     },'json');
 
 
+    function onLocationFound(e) {
+        var radius = e.accuracy / 2;
 
-    var popup = L.popup();
+        L.circle(e.latlng,15, {
+            color: 'blue',
+            fillColor: 'blue',
+            fillOpacity: 0.8
+        }).addTo(map)
+                .bindPopup("You are here").openPopup();
 
-    function onMapClick(e) {
-        popup
-                .setLatLng(e.latlng)
-                .setContent("You clicked the map at " + e.latlng.toString())
-                .openOn(map);
+        L.circle(e.latlng, radius).addTo(map);
     }
 
-    map.on('click', onMapClick);
+    map.on('locationfound', onLocationFound);
+
+    map.locate({setView: false});
 
 </script>
 </body>
