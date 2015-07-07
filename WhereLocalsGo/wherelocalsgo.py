@@ -67,11 +67,13 @@ class MapsHandler(web.RequestHandler):
             query={ "age_interval": age_interval,
                           "gender": gender,
                           "weekday": weekday }
+            order =pymongo.DESCENDING
         else:
             query={ "age_interval": age_interval,
                           "weekday": weekday }
+            order = pymongo.ASCENDING
 
-        zipcode_aggregation = db.merchant_zipcode_aggregation.find(query).sort("payments_proportion", pymongo.DESCENDING)
+        zipcode_aggregation = db.merchant_zipcode_aggregation.find(query).sort("payments_proportion", order)
 
         geo_json = db.merchant_zipcode_coordinates.find({}, {"_id": 0}).next()
         geo_json_aux = geo_json
