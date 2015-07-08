@@ -1,6 +1,12 @@
 angular.module('starter.controllers', [])
 
 
+.controller('MapCtrl', function($rootScope) {
+    preferences=$rootScope.preferences;
+    $rootScope.urlmap='/static/views/mapa.html?preferences=' + JSON.stringify(preferences);
+    console.log('MapCtrl');
+})
+
 .controller('PlacesCtrl', function($scope, $rootScope, Places) {
   // With the new view caching in Ionic, Controllers are only called
   // when they are recreated or on app start, instead of every page change.
@@ -18,6 +24,6 @@ angular.module('starter.controllers', [])
 
 .controller('AccountCtrl', function($rootScope) {
     $rootScope.recomendme = function() {
-        window.location='#/tab/dash';
+        window.location='#/tab/map';
     };
 });
