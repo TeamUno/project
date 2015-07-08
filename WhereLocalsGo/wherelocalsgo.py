@@ -60,8 +60,10 @@ class MapsHandler(web.RequestHandler):
             for key, ranges in age_ranges.iteritems():
                 if int(preference_data["age"]) in ranges:
                    age_interval = key
-
-        weekday = str(datetime.date.today().weekday())
+        if preference_data["weekday"] != '':
+            weekday=preference_data["weekday"]
+        else:
+            weekday = str(datetime.date.today().weekday())
 
         if preference_data["gender"] != '':
             query={ "age_interval": age_interval,
