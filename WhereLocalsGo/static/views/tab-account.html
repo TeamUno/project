@@ -5,49 +5,49 @@
       </div>
       <div class="list tabs" style="height: 55px;">
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="0"  ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="1"  ng-model="preferences.weekday">
           <div class="item-content" >
             Mon
           </div>
 
         </label>
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="1" ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="2" ng-model="preferences.weekday">
           <div class="item-content">
             Tue
           </div>
 
         </label>
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="2"  ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="3"  ng-model="preferences.weekday">
           <div class="item-content">
             Wed
           </div>
 
         </label>
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="3"  ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="4"  ng-model="preferences.weekday">
           <div class="item-content">
             Thu
           </div>
 
         </label>
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="4"  ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="5"  ng-model="preferences.weekday">
           <div class="item-content">
             Fri
           </div>
 
         </label>
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="5"  ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="6"  ng-model="preferences.weekday">
           <div class="item-content">
             Sat
           </div>
 
         </label>
         <label class="checkbox checkbox-royal" >
-          <input type="radio" name="weekday" value="6"  ng-model="preferences.weekday">
+          <input type="radio" name="weekday" value="0"  ng-model="preferences.weekday">
           <div class="item-content">
             Sun
           </div>
@@ -60,7 +60,15 @@
             Age
           </div>
           <i class="icon ion-ios-person-outline"></i>
-          <input type="range" name="age" min="0" max="100" value="33" ng-model="preferences.age">
+          <input type="range" name="age" min="20" max="70" value="33" step="10" ng-model="preferences.age">
+          <div class="animate-switch-container">
+            <div class="animate-switch" ng-if="preferences.age < 25"> <25 </div>
+            <div class="animate-switch" ng-if="25 <= preferences.age && preferences.age < 35">25-34</div>
+            <div class="animate-switch" ng-if="35 <= preferences.age && preferences.age< 45">35-44</div>
+            <div class="animate-switch" ng-if="45 <= preferences.age && preferences.age< 55">45-54</div>
+            <div class="animate-switch" ng-if="55 <= preferences.age && preferences.age< 65">55-64</div>
+            <div class="animate-switch" ng-if="65 < preferences.age "> >65 </div>
+          </div>
           <i class="icon ion-ios-personadd"></i>
         </div>
       </div>
