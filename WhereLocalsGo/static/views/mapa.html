@@ -71,7 +71,7 @@
         if(props) {
 
             this._div.innerHTML = '<h4> zipcode: ' + props.zipcode + '</h4>' + (props ?
-                    '<b>rating:' + props.payments_proportion.toFixed(1)*10
+                    '<b>rating:' + parseFloat(props.payments_proportion).toFixed(1)*10
 		            : 'Hover over a zipcode');
         }
     };

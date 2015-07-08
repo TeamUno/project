@@ -25,7 +25,7 @@ angular.module('starter.controllers', [])
 .controller('AccountCtrl', function($rootScope) {
     var d = new Date();
     var n = d.getDay();
-    $rootScope.preferences.weekday=n;
+    $rootScope.preferences.weekday= n.toString();
     $rootScope.recomendme = function() {
         window.location='#/tab/map';
     };
