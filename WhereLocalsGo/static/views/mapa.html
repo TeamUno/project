@@ -99,28 +99,31 @@
     }
 
     function highlightFeature(e) {
-        var layer = e.target;
+        if(active!=e.target._leaflet_id){
+            var layer = e.target;
 
-        layer.setStyle({
-            weight: 2,
-            color: 'yellow',
-            dashArray: '',
-            fillOpacity: 0.05
-        });
+            layer.setStyle({
+                weight: 2,
+                color: 'yellow',
+                dashArray: '',
+                fillOpacity: 0.05
+            });
 
-        if (!L.Browser.ie && !L.Browser.opera) {
-            layer.bringToFront();
+            if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+            }
+
+            info.update(layer.feature.properties);
         }
-
-        info.update(layer.feature.properties);
-
     }
 
     var geojson;
 
     function resetHighlight(e) {
-        geojson.resetStyle(e.target);
-        info.update();
+        if(active!=e.target._leaflet_id) {
+            geojson.resetStyle(e.target);
+            info.update();
+        }
     }
 
     markers = new L.FeatureGroup();
@@ -163,13 +166,28 @@
         map.addLayer(markers);
     }
 
+    active='';
+    eactive='';
+    function saveActive(e){
+        var auxactive=eactive;
+        active=e.target._leaflet_id;
+        eactive=e;
+        if(eactive!=''){
+            resetHighlight(auxactive);
+        }
+    }
+
     function zoomToFeature(e) {
-        markers.clearLayers();
-        var zipcode= e.target.feature.properties.zipcode;
-        $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
-            updateMarkers(json);
-        },'json');
-        map.fitBounds(e.target.getBounds());
+        if(active!=e.target._leaflet_id){
+            markers.clearLayers();
+            var zipcode= e.target.feature.properties.zipcode;
+            $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
+                updateMarkers(json);
+            },'json');
+            map.fitBounds(e.target.getBounds());
+            highlightFeature(e);
+        }
+        saveActive(e);
     }
 
     function onEachFeature(feature, layer) {
@@ -218,21 +236,18 @@
 
 
     function onLocationFound(e) {
-        var radius = e.accuracy / 2;
-
         L.circle(e.latlng,15, {
             color: 'blue',
             fillColor: 'blue',
             fillOpacity: 0.8
         }).addTo(map)
-                .bindPopup("You are here").openPopup();
-
-        L.circle(e.latlng, radius).addTo(map);
+                .bindPopup("You are here");
     }
 
+    map.locate({setView: false});
     map.on('locationfound', onLocationFound);
 
-    map.locate({setView: false});
+
 
 </script>
 </body>
