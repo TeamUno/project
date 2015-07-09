@@ -71,7 +71,7 @@
         if(props) {
 
             this._div.innerHTML = '<h4> zipcode: ' + props.zipcode + '</h4>' + (props ?
-                    '<b>rating:' + props.payments_proportion.toFixed(1)*10
+                    '<b>rating:' + parseFloat(props.payments_proportion).toFixed(1)*10
 		            : 'Hover over a zipcode');
         }
     };
@@ -125,17 +125,39 @@
 
     markers = new L.FeatureGroup();
     function updateMarkers(places){
+        places.sort(function(a, b) {
+            return parseFloat(a.rating) - parseFloat(b.rating);
+        });
         for(i=0;i<places.length;i++){
-            var circle = L.circle([places[i].latitude, places[i].longitude], 15, {
-                color: 'red',
-                fillColor: '#f03',
+            var place= places[i];
+            var preferences=JSON.parse(get('preferences'));
+            var color='';
+            var size='';
+            color= place.price == preferences.amount ? 'red' : 'gray';
+            size= i >places.length-3 ? 45 : 15;
+
+            var circle = L.circle([place.latitude, place.longitude], size, {
+                width: 400,
+                color: color,
+                fillColor: color,
                 fillOpacity: 0.8
             });
+            function repeat(s, n){
+                var a = [];
+                while(a.length < n){
+                    a.push(s);
+                }
+                return a.join('');
+            }
             //var marker = L.marker([places[i].latitude, places[i].longitude]);
-            circle.bindPopup('<b>'+ places[i].name + '</b><br/>'
-                    + places[i].address + '<br/>'
-                    + places[i].phone + '<br/>'
-                    + places[i].category);
+            circle.bindPopup('<img width=200 src="' + place.photo_url + '"><br/>'
+                    + '<b>'+ place.name + '</b><br/>'
+                    + place.address + '<br/>'
+                    + place.phone + '<br/>'
+                    + 'Rating: <b>' + place.rating + '</b><br/>'
+                    + 'Price: ' + repeat('$',place.price)  + '<br/>'
+                    + place.category + '<br/>');
+
             markers.addLayer(circle);
         }
         map.addLayer(markers);

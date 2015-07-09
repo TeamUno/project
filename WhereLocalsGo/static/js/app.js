@@ -20,10 +20,10 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     }
   });
   $rootScope.preferences = {
-    category:'es_barsandrestaurants',
+    weekday:'',
     age: 33,
     gender: '',
-    amount:33
+    amount:2
   };
 })
 
