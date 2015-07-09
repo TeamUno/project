@@ -28,6 +28,6 @@ client = fq.Foursquare(
 for u in venues.find():
     if client.venues(u['id'])['venue']['photos']['count'] != 0 :
         photo_url_splitted = client.venues.photos(u['id'], {}, multi=False)['photos']['items'][0]
-        size = 'original' # other sizes available: https://developer.foursquare.com/docs/responses/photo.html
+        size = 'width200' # other sizes available: https://developer.foursquare.com/docs/responses/photo.html
         u['photo_url'] = photo_url_splitted['prefix'] + size + photo_url_splitted['suffix']
         venues.save(u)
