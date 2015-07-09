@@ -185,6 +185,7 @@
                 updateMarkers(json);
             },'json');
             map.fitBounds(e.target.getBounds());
+            highlightFeature(e);
         }
         saveActive(e);
     }
