@@ -17,8 +17,8 @@ except pymongo.errors.ConnectionFailure, e:
    print "Could not connect to MongoDB: %s" % e 
 
 
-db = conn['TeamUno']
-venues=db.venuesFS_BCN
+db = conn['wherelocalsgo']
+venues=db.places
 
 client = fq.Foursquare(
             client_id = 'UNPSIQJAFMS0TZXGSMDQETOEDBJHI0YOFSXILBB5OS1VXPKX',
