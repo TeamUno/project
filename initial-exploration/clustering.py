@@ -18,7 +18,7 @@ plt.style.use('ggplot')
 
 # Load datasets
 names = ["merchant_zipcode", "date", "category", "merchants", "cards", "payments", "avg_payment", "max_payment", "min_payment", "std"]
-basic_stats = pd.read_csv("basic_stats000", delim_whitespace=True, names= names, parse_dates=["date"])
+basic_stats = pd.read_csv("../dataset/basic_stats000", delim_whitespace=True, names= names, parse_dates=["date"])
 basic_stats["amount"] = basic_stats["payments"] * basic_stats["avg_payment"]
 bcn = basic_stats[basic_stats["merchant_zipcode"] < 8044]
 
@@ -33,7 +33,7 @@ def plot_cluster():
     plt.scatter(gbcn.loc[y_pred == 1, "merchant_zipcode"], gbcn.loc[y_pred == 1, "amount"], c="r")
     plt.scatter(gbcn.loc[y_pred == 2, "merchant_zipcode"], gbcn.loc[y_pred == 2, "amount"], c="g")
     plt.scatter(gbcn.loc[y_pred == 3, "merchant_zipcode"], gbcn.loc[y_pred == 3, "amount"], c="y")
-   
+
 
 # ---------------------------------------------------------------------
 # kmeans clustering
@@ -47,7 +47,7 @@ plt.subplot(2,2,1)
 plt.scatter(centroids[:, 0], centroids[:, 1],
             marker='x', s=169, linewidths=3,
             color='w', zorder=10)
-            
+
 plot_cluster()
 
 # we can use this cluster to add attributes to the dataset
@@ -56,8 +56,8 @@ level_amount = {0: 'low', 1: 'low-medium', 2: 'medium', 3: 'high', }
 def select_level_amount(row):
     cluster = kmeans.predict(row[["merchant_zipcode", "amount"]])
     return level_amount[cluster[0]]
-    
-gbcn["level_amount"] = gbcn.apply(select_level_amount, axis=1)         
+
+gbcn["level_amount"] = gbcn.apply(select_level_amount, axis=1)
 
 # --------------------------------------------------------------------
 # Spectral clustering
