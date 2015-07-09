@@ -129,13 +129,15 @@
             return parseFloat(a.rating) - parseFloat(b.rating);
         });
         for(i=0;i<places.length;i++){
+            var place= places[i];
             var preferences=JSON.parse(get('preferences'));
             var color='';
             var size='';
-            color= places[i].price == preferences.amount ? 'red' : 'gray';
+            color= place.price == preferences.amount ? 'red' : 'gray';
             size= i >places.length-3 ? 45 : 15;
 
-            var circle = L.circle([places[i].latitude, places[i].longitude], size, {
+            var circle = L.circle([place.latitude, place.longitude], size, {
+                width: 400,
                 color: color,
                 fillColor: color,
                 fillOpacity: 0.8
@@ -148,12 +150,14 @@
                 return a.join('');
             }
             //var marker = L.marker([places[i].latitude, places[i].longitude]);
-            circle.bindPopup('<b>'+ places[i].name + '</b><br/>'
-                    + places[i].address + '<br/>'
-                    + places[i].phone + '<br/>'
-                    + 'Rating: <b>' + places[i].rating + '</b><br/>'
-                    + 'Price: ' + repeat('$',places[i].price)  + '<br/>'
-                    + places[i].category);
+            circle.bindPopup('<b>'+ place.name + '</b><br/>'
+                    + place.address + '<br/>'
+                    + place.phone + '<br/>'
+                    + 'Rating: <b>' + place.rating + '</b><br/>'
+                    + 'Price: ' + repeat('$',place.price)  + '<br/>'
+                    + place.category + '<br/>');
+                    //+ '<img width=200 src="http://maps.googleapis.com/maps/api/staticmap?center='+ place.latitude + ','+ place.longitude +'&amp;zoom=16&amp;size=150x100&amp;sensor=false">');
+
             markers.addLayer(circle);
         }
         map.addLayer(markers);
