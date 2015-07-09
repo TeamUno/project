@@ -150,13 +150,13 @@
                 return a.join('');
             }
             //var marker = L.marker([places[i].latitude, places[i].longitude]);
-            circle.bindPopup('<b>'+ place.name + '</b><br/>'
+            circle.bindPopup('<img width=200 src="' + place.photo_url + '"><br/>'
+                    + '<b>'+ place.name + '</b><br/>'
                     + place.address + '<br/>'
                     + place.phone + '<br/>'
                     + 'Rating: <b>' + place.rating + '</b><br/>'
                     + 'Price: ' + repeat('$',place.price)  + '<br/>'
                     + place.category + '<br/>');
-                    //+ '<img width=200 src="http://maps.googleapis.com/maps/api/staticmap?center='+ place.latitude + ','+ place.longitude +'&amp;zoom=16&amp;size=150x100&amp;sensor=false">');
 
             markers.addLayer(circle);
         }
