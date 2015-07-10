@@ -106,6 +106,22 @@
         </div>
       </div>
       <div class="list">
+        <div class="item item-input">
+          <span class="input-label" style="max-width: 80px">Local</span>
+          <label class="toggle toggle-assertive">
+            <input type="checkbox" ng-model="preferences.local">
+            <div class="track">
+              <div class="handle"></div>
+            </div>
+          </label>
+          <span class="input-label" ng-show="preferences.local">Your Zipcode</span>
+          <label class="item-input-wrapper" ng-show="preferences.local" style="min-width:85px; max-width:85px;">
+            <input type="text" maxlength="5" ng-model="preferences.customerzipcode">
+          </label>
+          <label class="input-label">&nbsp;</label>
+        </div>
+      </div>
+      <div class="list">
         <button class="button button-block button-assertive" ng-click="recomendme()">
           Recomend me
         </button>

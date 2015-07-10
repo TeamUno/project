@@ -23,7 +23,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     weekday:'',
     age: 33,
     gender: '',
-    amount:2
+    amount:2,
+    customerzipcode:''
   };
 })
 
