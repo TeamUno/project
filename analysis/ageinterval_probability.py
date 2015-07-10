@@ -16,11 +16,11 @@ except pymongo.errors.ConnectionFailure, e:
 
 db = client['wherelocalsgo']
 
-db.drop_collection("gender_aggregation")
+db.drop_collection("ageinterval_aggregation")
 
 # Load datasets
-names = ["merchant_zipcode", "date", "category", "gender", "merchants", "cards", "payments", "avg_payments", "max_payments", "min_payments", "std"]
-gender_stats = pd.read_csv("../dataset/gender_distribution000",  delim_whitespace=True, names= names, parse_dates=["date"], dtype = {'merchant_zipcode': str})
+names = ["merchant_zipcode", "date", "category", "ageinterval", "merchants", "cards", "payments", "avg_payments", "max_payments", "min_payments", "std"]
+ageinterval_stats = pd.read_csv("../dataset/age_distribution000",  delim_whitespace=True, names= names, parse_dates=["date"], dtype = {'merchant_zipcode': str})
 
 bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
                 '08008', '08009', '08010', '08011', '08012', '08013', '08014',
@@ -29,14 +29,13 @@ bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
                 '08029', '08030', '08031', '08032', '08033', '08034', '08035',
                 '08036', '08037', '08038', '08039', '08040', '08041', '08042']
 
-gender_stats = gender_stats[gender_stats.merchant_zipcode.apply(lambda zp: zp in bcn_zipcodes)]
-gender_stats = gender_stats[gender_stats.gender != 'unknown']
-gender_stats = gender_stats[gender_stats.gender != 'enterprise']
-gender_stats = gender_stats[gender_stats.category == 'es_barsandrestaurants']
+ageinterval_stats = ageinterval_stats[ageinterval_stats.merchant_zipcode.apply(lambda zp: zp in bcn_zipcodes)]
+ageinterval_stats = ageinterval_stats[ageinterval_stats.ageinterval != 'unknown']
+ageinterval_stats = ageinterval_stats[ageinterval_stats.category == 'es_barsandrestaurants']
 
-gbcn = gender_stats.groupby(["gender", "merchant_zipcode"]).aggregate({ "payments": np.sum })
+gbcn = ageinterval_stats.groupby(["ageinterval", "merchant_zipcode"]).aggregate({ "payments": np.sum })
 gbcn=gbcn.fillna(1)
 total_payments = gbcn.payments.sum()
 gbcn['payments_proportion'] = gbcn.payments / total_payments
 
-db.gender_aggregation.insert(gbcn.reset_index().to_dict("records"))
+db.ageinterval_aggregation.insert(gbcn.reset_index().to_dict("records"))
