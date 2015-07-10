@@ -24,6 +24,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     age: 33,
     gender: '',
     amount:2,
+    local:false,
     customerzipcode:''
   };
 })
