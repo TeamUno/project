@@ -72,9 +72,11 @@ class MapsHandler(web.RequestHandler):
                 if int(preference_data["age"]) in ranges:
                    age_interval = key
         if preference_data["weekday"] != '':
-            weekday=preference_data["weekday"]
+            # range changed to adapted to python weekday
+            weekday = int(preference_data["weekday"])
+            weekday= weekday -1 if weekday != 0 else 6
         else:
-            weekday = str(datetime.date.today().weekday())
+            weekday = datetime.date.today().weekday()
 
 # TODO remove?
 #        if preference_data["gender"] != '':
@@ -87,8 +89,6 @@ class MapsHandler(web.RequestHandler):
 #                          "weekday": weekday }
 ##            order = pymongo.ASCENDING
 #        zipcode_aggregation = db.merchant_zipcode_aggregation.find(query).sort("payments_proportion", order)
-
-
 
         # We calculate probability where a user will go to a merchant_zipcode based on the preferences using
         # Naive Bayes calculations.
@@ -107,21 +107,23 @@ class MapsHandler(web.RequestHandler):
 
 def naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode):
     zipcode_proba = {}
+    minimum_proba = 0.0000001
     for zipcode in bcn_zipcodes:
-        ageinterval_cursor = db.ageinterval_aggregation.find_one( {"age_interval": age_interval, "merchant_zipcode": zipcode})
-        ageinterval_proba = ageinterval_cursor["payments_proportion"] if ageinterval_cursor != None else 0.0000001
 
-        if gender != '':
+        ageinterval_cursor = db.ageinterval_aggregation.find_one( {"ageinterval": age_interval, "merchant_zipcode": zipcode})
+        ageinterval_proba = ageinterval_cursor["payments_proportion"] if ageinterval_cursor != None else minimum_proba
+
+        if gender != "":
             gender_cursor = db.gender_aggregation.find_one( {"gender": gender, "merchant_zipcode": zipcode})
-            gender_proba = gender_cursor["payments_proportion"] if gender_cursor != None else 0.0000001
+            gender_proba = gender_cursor["payments_proportion"] if gender_cursor != None else minimum_proba
         else:
             gender_proba = 1
-        weekday_cursor = db.weekdayaggregation.find_one( {"weekday": weekday, "merchant_zipcode": zipcode})
-        weekday_proba = weekday_cursor["payments_proportion"] if weekday_cursor != None else 0.0000001
 
+        weekday_cursor = db.weekdayaggregation.find_one( {"weekday": weekday, "merchant_zipcode": zipcode})
+        weekday_proba = weekday_cursor["payments_proportion"] if weekday_cursor != None else minimum_proba
         if customerzipcode != '':
-            customer_cursor = db.costumerzipcode_aggregation.find_one( {"customerzipcode": customerzipcode, "merchant_zipcode": zipcode})
-            customer_proba = customer_cursor["payments_proportion"] if customer_cursor != None else 0.0000001
+            customer_cursor = db.customerzipcode_aggregation.find_one( {"customerzipcode": customerzipcode, "merchant_zipcode": zipcode})
+            customer_proba = customer_cursor["payments_proportion"] if customer_cursor != None else minimum_proba
         else:
             customer_proba = 1
 
