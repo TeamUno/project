@@ -35,6 +35,7 @@ gender_stats = gender_stats[gender_stats.gender != 'enterprise']
 gender_stats = gender_stats[gender_stats.category == 'es_barsandrestaurants']
 
 gbcn = gender_stats.groupby(["gender", "merchant_zipcode"]).aggregate({ "payments": np.sum })
+gbcn=gbcn.fillna(1)
 total_payments = gbcn.payments.sum()
 gbcn['payments_proportion'] = gbcn.payments / total_payments
 
