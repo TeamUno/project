@@ -28,15 +28,32 @@ bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
                 '08022', '08023', '08024', '08025', '08026', '08027', '08028',
                 '08029', '08030', '08031', '08032', '08033', '08034', '08035',
                 '08036', '08037', '08038', '08039', '08040', '08041', '08042']
+gender_list = ["male", "female"]
 
 gender_stats = gender_stats[gender_stats.merchant_zipcode.apply(lambda zp: zp in bcn_zipcodes)]
 gender_stats = gender_stats[gender_stats.gender != 'unknown']
 gender_stats = gender_stats[gender_stats.gender != 'enterprise']
 gender_stats = gender_stats[gender_stats.category == 'es_barsandrestaurants']
 
-gbcn = gender_stats.groupby(["gender", "merchant_zipcode"]).aggregate({ "payments": np.sum })
-gbcn=gbcn.fillna(1)
-total_payments = gbcn.payments.sum()
-gbcn['payments_proportion'] = gbcn.payments / total_payments
+def laplace_correction(payments, total_payments, beta):
+    return ( payments + 1. ) / (total_payments + beta)
 
-db.gender_aggregation.insert(gbcn.reset_index().to_dict("records"))
+
+gbcn = gender_stats.groupby(["gender", "merchant_zipcode"]).aggregate({ "payments": np.sum })
+gbcn = gbcn.reset_index()
+total_payments = gbcn.payments.sum()
+proba_list = []
+for zipcode in bcn_zipcodes:
+    for gender in gender_list:
+        proba = {}
+        proba["merchant_zipcode"] = zipcode
+        proba["gender"] = gender
+        if len(gbcn[(gbcn.gender == gender) & (gbcn.merchant_zipcode == zipcode)]) == 1 :
+          payments = int(gbcn[(gbcn.gender == gender) & (gbcn.merchant_zipcode == zipcode)].payments)
+        else:
+          payments = 0
+        proba["payments_proportion"] = laplace_correction(payments,total_payments, 84)
+        proba_list.append(proba)
+
+
+db.gender_aggregation.insert(proba_list)

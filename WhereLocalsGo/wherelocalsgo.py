@@ -18,8 +18,8 @@ age_ranges = { "<25":   range(0, 25),
                "25-34": range(25, 35),
                "35-44": range(35, 45),
                "45-54": range(45, 55),
-               "55-65": range(55, 65),
-               ">65":   range(65, 100) }
+               "55-64": range(55, 65),
+               ">=65":  range(65, 100) }
 bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
                 '08008', '08009', '08010', '08011', '08012', '08013', '08014',
                 '08015', '08016', '08017', '08018', '08019', '08020', '08021',
@@ -107,32 +107,28 @@ class MapsHandler(web.RequestHandler):
 
 def naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode):
     zipcode_proba = {}
-    minimum_proba = 0.0000001
     for zipcode in bcn_zipcodes:
 
-        ageinterval_cursor = db.ageinterval_aggregation.find_one( {"ageinterval": age_interval, "merchant_zipcode": zipcode})
-        ageinterval_proba = ageinterval_cursor["payments_proportion"] if ageinterval_cursor != None else minimum_proba
+        ageinterval_proba = db.ageinterval_aggregation.find_one( {"ageinterval": age_interval, "merchant_zipcode": zipcode})["payments_proportion"]
 
         if gender != "":
-            gender_cursor = db.gender_aggregation.find_one( {"gender": gender, "merchant_zipcode": zipcode})
-            gender_proba = gender_cursor["payments_proportion"] if gender_cursor != None else minimum_proba
+            gender_proba = db.gender_aggregation.find_one( {"gender": gender, "merchant_zipcode": zipcode})["payments_proportion"]
         else:
             gender_proba = 1
 
-        weekday_cursor = db.weekdayaggregation.find_one( {"weekday": weekday, "merchant_zipcode": zipcode})
-        weekday_proba = weekday_cursor["payments_proportion"] if weekday_cursor != None else minimum_proba
-        if customerzipcode != '':
-            customer_cursor = db.customerzipcode_aggregation.find_one( {"customerzipcode": customerzipcode, "merchant_zipcode": zipcode})
-            customer_proba = customer_cursor["payments_proportion"] if customer_cursor != None else minimum_proba
+        weekday_proba = db.weekday_aggregation.find_one( {"weekday": weekday, "merchant_zipcode": zipcode})["payments_proportion"]
+
+        if customerzipcode != "":
+            customer_proba = db.customerzipcode_aggregation.find_one( {"customerzipcode": customerzipcode, "merchant_zipcode": zipcode})["payments_proportion"]
         else:
             customer_proba = 1
 
         # Naive Bayes probability.
-        zipcode_proba[zipcode] = customer_proba * ageinterval_proba * gender_proba * weekday_proba
+        zipcode_proba[zipcode] =  ageinterval_proba * weekday_proba
     return zipcode_proba
 
 def normalize_relative_to_max(zipcode_proba):
-    max_proba = zipcode_proba[max(zipcode_proba, key=zipcode_proba.get)]
+    max_proba = max(zipcode_proba.values())
     for zipcode in zipcode_proba:
         zipcode_proba[zipcode] = zipcode_proba[zipcode] / max_proba
     return zipcode_proba

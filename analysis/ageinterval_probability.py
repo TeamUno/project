@@ -33,9 +33,30 @@ ageinterval_stats = ageinterval_stats[ageinterval_stats.merchant_zipcode.apply(l
 ageinterval_stats = ageinterval_stats[ageinterval_stats.ageinterval != 'unknown']
 ageinterval_stats = ageinterval_stats[ageinterval_stats.category == 'es_barsandrestaurants']
 
-gbcn = ageinterval_stats.groupby(["ageinterval", "merchant_zipcode"]).aggregate({ "payments": np.sum })
-gbcn=gbcn.fillna(1)
-total_payments = gbcn.payments.sum()
-gbcn['payments_proportion'] = gbcn.payments / total_payments
+def laplace_correction(payments, total_payments, beta):
+    return ( payments + 1. ) / (total_payments + beta)
 
-db.ageinterval_aggregation.insert(gbcn.reset_index().to_dict("records"))
+
+gbcn = ageinterval_stats.groupby(["ageinterval", "merchant_zipcode"]).aggregate({ "payments": np.sum })
+gbcn = gbcn.reset_index()
+
+total_payments = gbcn.payments.sum()
+
+proba_list = []
+age_interval_list = list(ageinterval_stats.ageinterval.unique())
+beta = len(age_interval_list) * len(bcn_zipcodes)
+for zipcode in bcn_zipcodes:
+    for age_interval in age_interval_list:
+        proba = {}
+        proba["merchant_zipcode"] = zipcode
+        proba["ageinterval"] = age_interval
+        row = gbcn[(gbcn.ageinterval == age_interval) & (gbcn.merchant_zipcode == zipcode)]
+        if len(row) == 1 :
+          payments = int(row.payments)
+        else:
+          payments = 0
+        proba["payments_proportion"] = laplace_correction(payments,total_payments, beta)
+        proba_list.append(proba)
+
+
+db.ageinterval_aggregation.insert(proba_list)

@@ -33,9 +33,31 @@ customerzipcode_stats = customerzipcode_stats[customerzipcode_stats.merchant_zip
 customerzipcode_stats = customerzipcode_stats[customerzipcode_stats.customerzipcode != 'unknown']
 customerzipcode_stats = customerzipcode_stats[customerzipcode_stats.category == 'es_barsandrestaurants']
 
-gbcn = customerzipcode_stats.groupby(["customerzipcode", "merchant_zipcode"]).aggregate({ "payments": np.sum })
-gbcn=gbcn.fillna(1)
-total_payments = gbcn.payments.sum()
-gbcn['payments_proportion'] = gbcn.payments / total_payments
+def laplace_correction(payments, total_payments, beta):
+    return ( payments + 1. ) / (total_payments + beta)
 
-db.customerzipcode_aggregation.insert(gbcn.reset_index().to_dict("records"))
+
+
+gbcn = customerzipcode_stats.groupby(["customerzipcode", "merchant_zipcode"]).aggregate({ "payments": np.sum })
+gbcn = gbcn.reset_index()
+
+total_payments = gbcn.payments.sum()
+
+proba_list = []
+customer_list = list(customerzipcode_stats.customerzipcode.unique())
+beta = len(customer_list) * len(bcn_zipcodes)
+for zipcode in bcn_zipcodes:
+    for customer_zipcode in customer_list:
+        proba = {}
+        proba["merchant_zipcode"] = zipcode
+        proba["customerzipcode"] = customer_zipcode
+        row = gbcn[(gbcn.customerzipcode == customer_zipcode) & (gbcn.merchant_zipcode == zipcode)]
+        if len(row) == 1 :
+          payments = int(row.payments)
+        else:
+          payments = 0
+        proba["payments_proportion"] = laplace_correction(payments,total_payments, beta)
+        proba_list.append(proba)
+
+
+db.customerzipcode_aggregation.insert(proba_list)

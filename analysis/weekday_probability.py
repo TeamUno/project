@@ -33,9 +33,30 @@ bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
 weekdaystats = weekdaystats[weekdaystats.merchant_zipcode.apply(lambda zp: zp in bcn_zipcodes)]
 weekdaystats = weekdaystats[weekdaystats.category == 'es_barsandrestaurants']
 
-gbcn = weekdaystats.groupby(["weekday", "merchant_zipcode"]).aggregate({ "payments": np.sum })
-gbcn=gbcn.fillna(1)
-total_payments = gbcn.payments.sum()
-gbcn['payments_proportion'] = gbcn.payments / total_payments
+def laplace_correction(payments, total_payments, beta):
+    return ( payments + 1. ) / (total_payments + beta)
 
-db.weekdayaggregation.insert(gbcn.reset_index().to_dict("records"))
+
+
+gbcn = weekdaystats.groupby(["weekday", "merchant_zipcode"]).aggregate({ "payments": np.sum })
+gbcn = gbcn.reset_index()
+
+total_payments = gbcn.payments.sum()
+proba_list = []
+weekdays_list = range(0,7)
+beta = len(weekdays_list) * len(bcn_zipcodes)
+for zipcode in bcn_zipcodes:
+    for weekday in weekdays_list:
+        proba = {}
+        proba["merchant_zipcode"] = zipcode
+        proba["weekday"] = weekday
+        row = gbcn[(gbcn.weekday == weekday) & (gbcn.merchant_zipcode == zipcode)]
+        if len(row) == 1 :
+          payments = int(row.payments)
+        else:
+          payments = 0
+        proba["payments_proportion"] = laplace_correction(payments,total_payments, beta)
+        proba_list.append(proba)
+
+
+db.weekday_aggregation.insert(proba_list)
