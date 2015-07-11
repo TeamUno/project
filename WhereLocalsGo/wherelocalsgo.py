@@ -109,10 +109,10 @@ def naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode):
     zipcode_proba = {}
     for zipcode in bcn_zipcodes:
 
-        ageinterval_proba = db.ageinterval_aggregation.find_one( {"ageinterval": age_interval, "merchant_zipcode": zipcode})["payments_proportion"]
+        ageinterval_proba = db.ageinterval_aggregation_prob.find_one( {"ageinterval": age_interval, "merchant_zipcode": zipcode})["payments_proportion"]
 
         if gender != "":
-            gender_proba = db.gender_aggregation.find_one( {"gender": gender, "merchant_zipcode": zipcode})["payments_proportion"]
+            gender_proba = db.gender_aggregation_prob.find_one( {"gender": gender, "merchant_zipcode": zipcode})["payments_proportion"]
         else:
             gender_proba = 1
 
