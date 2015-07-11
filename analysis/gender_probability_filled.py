@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 import pymongo
 
+# Set seed
+np.random.seed(123)
+
 # Connection to Mongo DB
 try:
     client = pymongo.MongoClient()
@@ -18,6 +21,7 @@ except pymongo.errors.ConnectionFailure, e:
 db = client['wherelocalsgo']
 
 db.drop_collection("gender_aggregation")
+db.drop_collection("gender_aggregation_prob")
 
 names = ["merchant_zipcode", "date", "category", "gender", "merchants", "cards", "payments", "avg_payments", "max_payments", "min_payments", "std"]
 gender_stats = pd.read_csv("../dataset/gender_distribution000",  delim_whitespace=True, names= names, parse_dates=["date"], dtype = {'merchant_zipcode': str})
@@ -59,7 +63,7 @@ for zipcode in bcn_zipcodes:
           payments = 0
         proba["payments_proportion"] = laplace_correction(payments,total_payments, beta)
         proba_list.append(proba)
-        
+
 db.gender_aggregation.insert(proba_list)
 
 gender_df=pd.DataFrame(proba_list)
@@ -71,6 +75,7 @@ gender_stats = gender_stats[gender_stats.category == 'es_barsandrestaurants']
 #
 #  EN CADA ZIPCODE SE CALCULA LA PROPORCIÓN DE MALE, FEMALE Y ENTERPRISE Y SE HACE UNA ELECCIÓN ALEATORIA SEGÚN LA MISMA
 #
+
 def genderify(zipcode):
     props = gender_df[gender_df['merchant_zipcode'] == zipcode].payments_proportion
     tot = props.sum()
