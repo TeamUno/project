@@ -124,7 +124,7 @@ def naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode):
             customer_proba = 1
 
         # Naive Bayes probability.
-        zipcode_proba[zipcode] =  ageinterval_proba * weekday_proba
+        zipcode_proba[zipcode] =  ageinterval_proba * weekday_proba * customer_proba * gender_proba
     return zipcode_proba
 
 def normalize_relative_to_max(zipcode_proba):
