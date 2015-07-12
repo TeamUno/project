@@ -59,4 +59,4 @@ for zipcode in bcn_zipcodes:
         proba_list.append(proba)
 
 
-db.weekday_aggregation.insert(proba_list)
+db.weekday_aggregation_prob.insert(proba_list)
