@@ -9,7 +9,6 @@ import pandas as pd
 import numpy as np
 import pymongo
 
-folder = '/Users/diego/Documents/DataScience_and_BiGData_UB/TeamUno/project/dataset/'
 # Connection to Mongo DB
 try:
     client = pymongo.MongoClient()
@@ -23,7 +22,7 @@ db.drop_collection("time_aggregation_prob")
 
 # Load datasets
 names = ["merchant_zipcode", "date", "day_of_week", "hour",  "merchants", "cards", "payments", "avg_payment", "max_payment", "min_payment", "std"]
-time = pd.read_csv(folder+"expenditure-time_curve000", delim_whitespace=True, names=names, parse_dates=["date"])
+time = pd.read_csv("../dataset/expenditure-time_curve000", delim_whitespace=True, names=names, parse_dates=["date"])
 time["merchant_zipcode"]=time["merchant_zipcode"].apply(lambda x: str(x).zfill(5))
 time["weekday"] = time["date"].map(lambda d: (d.weekday()))
 
