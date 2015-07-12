@@ -20,6 +20,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     }
   });
   $rootScope.preferences = {
+    time:'',
     weekday:'',
     age: 33,
     gender: '',
