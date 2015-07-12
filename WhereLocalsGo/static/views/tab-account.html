@@ -3,6 +3,29 @@
     <ion-list>
       <div class="list">
       </div>
+      <div class="list tabs">
+        <label class="item tab-item item-radio">
+          <input type="radio" name="time" value="0" checked="checked" ng-model="preferences.time">
+          <div class="item-content">
+            Morning
+          </div>
+          <i class="radio-icon ion-checkmark"></i>
+        </label>
+        <label class="item tab-item item-radio">
+          <input type="radio" name="time" value="1" checked="checked" ng-model="preferences.time">
+          <div class="item-content">
+            Noon
+          </div>
+          <i class="radio-icon ion-checkmark"></i>
+        </label>
+        <label class="item tab-item item-radio">
+          <input type="radio" name="time" value="2" checked="checked" ng-model="preferences.time">
+          <div class="item-content">
+            Night
+          </div>
+          <i class="radio-icon ion-checkmark"></i>
+        </label>
+      </div>
       <div class="list tabs" style="height: 55px;">
         <label class="checkbox checkbox-royal" >
           <input type="radio" name="weekday" value="1"  ng-model="preferences.weekday">
