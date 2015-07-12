@@ -79,10 +79,10 @@
     info.addTo(map);
 
     function getColor(d) {
-    	return d >= 9 ? '#253494' :
-               d >= 8 ? '#2c7fb8' :
-               d >= 6 ? '#41b6c4' :
-               d >= 3 ? '#a1dab4' :
+    	return d > 9 ? '#253494' :
+               d > 8 ? '#2c7fb8' :
+               d > 6 ? '#41b6c4' :
+               d > 3 ? '#a1dab4' :
                d > 0 ? '#ffffcc' :
                        '#ffffff';
     }
@@ -99,28 +99,31 @@
     }
 
     function highlightFeature(e) {
-        var layer = e.target;
+        if(active!=e.target._leaflet_id){
+            var layer = e.target;
 
-        layer.setStyle({
-            weight: 2,
-            color: 'yellow',
-            dashArray: '',
-            fillOpacity: 0.05
-        });
+            layer.setStyle({
+                weight: 2,
+                color: 'yellow',
+                dashArray: '',
+                fillOpacity: 0.05
+            });
 
-        if (!L.Browser.ie && !L.Browser.opera) {
-            layer.bringToFront();
+            if (!L.Browser.ie && !L.Browser.opera) {
+                layer.bringToFront();
+            }
+
+            info.update(layer.feature.properties);
         }
-
-        info.update(layer.feature.properties);
-
     }
 
     var geojson;
 
     function resetHighlight(e) {
-        geojson.resetStyle(e.target);
-        info.update();
+        if(active!=e.target._leaflet_id) {
+            geojson.resetStyle(e.target);
+            info.update();
+        }
     }
 
     markers = new L.FeatureGroup();
@@ -149,13 +152,14 @@
                 }
                 return a.join('');
             }
+	        var prices = ['<20€', '20-30€', '30-40€', '>45€']
             //var marker = L.marker([places[i].latitude, places[i].longitude]);
             circle.bindPopup('<img width=200 src="' + place.photo_url + '"><br/>'
                     + '<b>'+ place.name + '</b><br/>'
-                    + place.address + '<br/>'
+                    + place.address.substring(0,place.address.length-11) + '<br/>'
                     + place.phone + '<br/>'
                     + 'Rating: <b>' + place.rating + '</b><br/>'
-                    + 'Price: ' + repeat('$',place.price)  + '<br/>'
+                    + 'Price: ' + prices[place.price-1]  + '<br/>'
                     + place.category + '<br/>');
 
             markers.addLayer(circle);
@@ -163,13 +167,28 @@
         map.addLayer(markers);
     }
 
+    active='';
+    eactive='';
+    function saveActive(e){
+        var auxactive=eactive;
+        active=e.target._leaflet_id;
+        eactive=e;
+        if(eactive!=''){
+            resetHighlight(auxactive);
+        }
+    }
+
     function zoomToFeature(e) {
-        markers.clearLayers();
-        var zipcode= e.target.feature.properties.zipcode;
-        $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
-            updateMarkers(json);
-        },'json');
-        map.fitBounds(e.target.getBounds());
+        if(active!=e.target._leaflet_id){
+            markers.clearLayers();
+            var zipcode= e.target.feature.properties.zipcode;
+            $.post("/api/v1/places", '{"zipcode":"'+zipcode+'"}', function(json) {
+                updateMarkers(json);
+            },'json');
+            map.fitBounds(e.target.getBounds());
+            highlightFeature(e);
+        }
+        saveActive(e);
     }
 
     function onEachFeature(feature, layer) {
@@ -185,14 +204,14 @@
     legend.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'info legend'),
-            grades = [6, 7, 8, 9, 10],
+            grades = [3, 6, 8, 9, 10],
             labels = [];
 
         // loop through our density intervals and generate a label with a colored square for each interval
         for (var i = grades.length-1; i >= 0; i--) {
             div.innerHTML +=
                 '<i style="background:' + getColor(grades[i]) + '"></i> ' +
-                (grades[i-1] ? grades[i-1] : '5') + (grades[i] ? '&ndash;' + grades[i] + '<br>' : '+');
+                (grades[i-1] ? grades[i-1] : '0') + (grades[i] ? '&ndash;' + grades[i] + '<br>' : '+');
         }
 
         return div;
@@ -218,21 +237,18 @@
 
 
     function onLocationFound(e) {
-        var radius = e.accuracy / 2;
-
         L.circle(e.latlng,15, {
             color: 'blue',
             fillColor: 'blue',
             fillOpacity: 0.8
         }).addTo(map)
-                .bindPopup("You are here").openPopup();
-
-        L.circle(e.latlng, radius).addTo(map);
+                .bindPopup("You are here");
     }
 
+    map.locate({setView: false});
     map.on('locationfound', onLocationFound);
 
-    map.locate({setView: false});
+
 
 </script>
 </body>
