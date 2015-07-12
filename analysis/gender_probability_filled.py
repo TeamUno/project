@@ -103,7 +103,7 @@ for zipcode in bcn_zipcodes:
         for weekday in weekday_list:
             proba = {}
             proba["merchant_zipcode"] = zipcode
-            proba["gender_prob"] = gender
+            proba["gender"] = gender
             proba["weekday"] = weekday
             row = gbcn[(gbcn.weekday == weekday) & (gbcn.gender_prob == gender) & (gbcn.merchant_zipcode == zipcode)]
             if len(row) == 1 :
