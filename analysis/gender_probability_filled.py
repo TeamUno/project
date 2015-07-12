@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 import pymongo
 
+# Set seed
+np.random.seed(123)
+
 # Connection to Mongo DB
 try:
     client = pymongo.MongoClient()
@@ -65,7 +68,7 @@ for zipcode in bcn_zipcodes:
               payments = 0
             proba["payments_proportion"] = laplace_correction(payments,total_payments, beta)
             proba_list.append(proba)
-        
+
 db.gender_aggregation.insert(proba_list)
 
 gender_df=pd.DataFrame(proba_list)

@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 import pymongo
 
+# set seed
+np.random.seed(123)
+
 # Connection to Mongo DB
 try:
     client = pymongo.MongoClient()
@@ -29,7 +32,6 @@ bcn_zipcodes = ['08001', '08002', '08003', '08004', '08005', '08006', '08007',
                 '08022', '08023', '08024', '08025', '08026', '08027', '08028',
                 '08029', '08030', '08031', '08032', '08033', '08034', '08035',
                 '08036', '08037', '08038', '08039', '08040', '08041', '08042']
-                
 age_interval_list = [ '<25', '25-34', '35-44', '45-54', '55-64', '>=65']    
 weekday_list = range(0,7)
       
