@@ -158,10 +158,9 @@
             circle.bindPopup('<img width=200 src="' + place.photo_url + '"><br/>'
                     + '<b>'+ place.name + '</b><br/>'
                     + place.address.substring(0,place.address.length-11) + '<br/>'
-                    + place.phone + '<br/>'
+                    + 'Reviews: <b>' + place.reviews + '</b><br/>'
                     + 'Rating: <b>' + place.rating + '</b><br/>'
-                    + 'Price: ' + prices[place.price-1]  + '<br/>'
-                    + place.category + '<br/>');
+                   + 'Price: <b>' + prices[place.price-1]  + '</b><br/>');
 
             markers.addLayer(circle);
         }
