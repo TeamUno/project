@@ -57,26 +57,32 @@ class PlaceHandler(web.RequestHandler):
 class MapsHandler(web.RequestHandler):
     def post(self):
         preference_data = {}
-        gender = ""
+        time=""
         age_interval = ""
+        gender = ""
         customerzipcode = ""
 
         if self.request.body != "":
             preference_data = json.loads(self.request.body)
-        if preference_data["gender"] != '':
-            gender = preference_data["gender"]
-        if preference_data["customerzipcode"] != '':
-            customerzipcode = preference_data["customerzipcode"]
-        if preference_data["age"] != '':
-            for key, ranges in age_ranges.iteritems():
-                if int(preference_data["age"]) in ranges:
-                   age_interval = key
+
+        if preference_data["time"] != '':
+            time = int(preference_data["time"])
         if preference_data["weekday"] != '':
             # range changed to adapted to python weekday
             weekday = int(preference_data["weekday"])
             weekday= weekday -1 if weekday != 0 else 6
         else:
             weekday = datetime.date.today().weekday()
+        if preference_data["age"] != '':
+            for key, ranges in age_ranges.iteritems():
+                if int(preference_data["age"]) in ranges:
+                   age_interval = key
+        if preference_data["gender"] != '':
+            gender = preference_data["gender"]
+        if preference_data["customerzipcode"] != '':
+            customerzipcode = preference_data["customerzipcode"]
+
+
 
 # TODO remove?
 #        if preference_data["gender"] != '':
@@ -92,7 +98,7 @@ class MapsHandler(web.RequestHandler):
 
         # We calculate probability where a user will go to a merchant_zipcode based on the preferences using
         # Naive Bayes calculations.
-        zipcode_proba = naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode)
+        zipcode_proba = naive_bayes_probabilities(time, weekday, age_interval, gender, customerzipcode)
 
         # We normalize values relative to the max probability found, so we can have a scale from 0-1 where 1 is
         # the max probability and the following values will be proportion from the max value.
@@ -105,9 +111,14 @@ class MapsHandler(web.RequestHandler):
         self.write(geo_json)
 
 
-def naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode):
+def naive_bayes_probabilities(time, weekday, age_interval, gender, customerzipcode):
     zipcode_proba = {}
     for zipcode in bcn_zipcodes:
+
+        if time != "":
+            time_proba = db.time_aggregation_prob.find_one({"weekday": weekday, "time": time, "merchant_zipcode": zipcode})["payments_proportion"]
+        else:
+            time_proba = 1
 
         ageinterval_proba = db.ageinterval_aggregation_prob.find_one({"weekday": weekday, "ageinterval": age_interval, "merchant_zipcode": zipcode})["payments_proportion"]
 
@@ -124,7 +135,7 @@ def naive_bayes_probabilities(age_interval, gender, weekday, customerzipcode):
             customer_proba = 1
 
         # Naive Bayes probability.
-        zipcode_proba[zipcode] =  ageinterval_proba * customer_proba * gender_proba
+        zipcode_proba[zipcode] = time_proba * weekday_proba * ageinterval_proba * customer_proba * gender_proba
     return zipcode_proba
 
 def normalize_relative_to_max(zipcode_proba):
