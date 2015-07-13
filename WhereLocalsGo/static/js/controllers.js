@@ -25,6 +25,13 @@ angular.module('starter.controllers', [])
 .controller('AccountCtrl', function($rootScope) {
     var d = new Date();
     var n = d.getDay();
+
+    $rootScope.$watch("preferences.local", function(newValue, oldValue) {
+        if(newValue==false){
+            $rootScope.preferences.customerzipcode='';
+        }
+    });
+
     $rootScope.preferences.weekday= n.toString();
     $rootScope.recomendme = function() {
         window.location='#/tab/map';
