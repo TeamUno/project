@@ -130,16 +130,20 @@
     markers = new L.FeatureGroup();
     function updateMarkers(places){
         places.sort(function(a, b) {
-            return parseFloat(a.rating) - parseFloat(b.rating);
+            return parseFloat(b.rating) - parseFloat(a.rating);
         });
+        var numfiltroamount=0;
         for(i=0;i<places.length;i++){
             var place= places[i];
             var preferences=JSON.parse(get('preferences'));
             var color='';
             var size='';
             color= place.price == preferences.amount ? 'red' : 'gray';
-            size= i >places.length-3 ? 45 : 15;
-
+            size = i <3 ? 45 : 15;
+            if (color=='red' && numfiltroamount<=3){
+                numfiltroamount++;
+                size=45;
+            }
             var circle = L.circle([place.latitude, place.longitude], size, {
                 width: 400,
                 color: color,
