@@ -160,11 +160,12 @@
 	        var prices = ['<20€', '20-30€', '30-40€', '>45€']
             //var marker = L.marker([places[i].latitude, places[i].longitude]);
             circle.bindPopup('<img width=200 src="' + place.photo_url + '"><br/>'
-                    + '<b>'+ place.name + '</b><br/>'
+                    + '<a href="'+ place.url + '">' + place.name + '</a><br/>'
                     + place.address.substring(0,place.address.length-11) + '<br/>'
                     + 'Reviews: <b>' + place.reviews + '</b><br/>'
                     + 'Rating: <b>' + place.rating + '</b><br/>'
-                   + 'Price: <b>' + prices[place.price-1]  + '</b><br/>');
+                    + 'Price: <b>' + prices[place.price-1]  + '</b><br/>'
+                    + 'Telephone: <a href="tel:' + place.telephone + '">' + place.telephone + '</a><br/>');
 
             markers.addLayer(circle);
         }
@@ -241,9 +242,9 @@
 
 
     function onLocationFound(e) {
-        L.circle(e.latlng,15, {
-            color: 'blue',
-            fillColor: 'blue',
+        L.circle(e.latlng,20, {
+            color: 'orange',
+            fillColor: 'yellow',
             fillOpacity: 0.8
         }).addTo(map)
                 .bindPopup("You are here");
