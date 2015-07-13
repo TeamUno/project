@@ -8,6 +8,9 @@ import pandas as pd
 import numpy as np
 import pymongo
 
+# Set seed
+np.random.seed(123)
+
 # Connection to Mongo DB
 try:
     client = pymongo.MongoClient()
